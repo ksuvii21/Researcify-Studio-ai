@@ -22,5 +22,5 @@ app.listen(PORT, () => {
 
 // GET /api/health - Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'true', message: 'ResearchFlow API is running', timestamp: new Date() });
+    res.json({ status: 'true', message: 'Researchify Studio API is running', timestamp: new Date() });
 });
