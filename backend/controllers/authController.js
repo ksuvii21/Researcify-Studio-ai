@@ -33,8 +33,11 @@ exports.register = async (req, res) => {
         //Save the new user to the database
         await newUser.save();
 
+        //Generate a JWT token for the newly registered user with their ID and a secret key, set to expire in 1 hour
+        const token = jwt.sign({id: newUser._id}, process.env.JWT_SECRET, {expiresIn: '1d'});
+
         //Send a success response with the newly created user object (excluding the password) with status 201 (Created)
-        res.status(201).json({message: 'User registered successfully.'})
+        res.status(201).json({success: true, message: 'User registered successfully.', data: {user: {id: newUser._id, name: newUser.name, email: newUser.email}, token}});
     }
     catch(err){
         //Catch any server errors and return a 500 status code
@@ -66,10 +69,37 @@ exports.login = async(req, res) => {
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '1h'});
 
         //Send back the generated token and a success message with status 200 (OK)
-        res.status(200).json({message: 'Login successful.', token});
+        res.status(200).json({success: true,
+            message: 'Login successful',
+            data: {
+                user: { id: user._id, name: user.name, email: user.email },
+                token
+            }});
     }
     catch(err){
         //Catch any server errors and return a 500 status code
-        res.status(500).json({message: 'Server error during login.', error: err.message});
+        res.status(500).json({success: false, message: 'Server error during login.', error: err.message});
+    }
+};
+
+exports.logout = async (req, res) => {
+    //If using JWT stored on client side (localStorage/sessionStorage), logout is handled on the client side by removing the token.
+    res.status(200).json({success: true, message: 'Logout successful.'});
+};
+
+//Retrieve current user
+exports.getMe = async (req, res) => {
+    try{
+        //req.user.id comes from your verifyToken middleware
+        const user = await User.findById(req.user.id).select('-password');
+
+        if(!user){
+            return res.status(404).json({success: false, message: 'User not found.'});
+        }
+
+        res.status(200).json({success: true, message: 'Current user fetched successfully', data: {user}});
+    }
+    catch(err){
+        res.status(500).json({success: false, message: 'Server error while fetching current user.', error: err.message});
     }
 };
