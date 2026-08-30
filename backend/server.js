@@ -1,6 +1,10 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const authRoutes = require('./routes/authRoutes');
+
+// Mount using the exact versioned prefix requested
+app.use('/api/v1/auth', authRoutes);
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
