@@ -1,35 +1,64 @@
 import useAuth from "../hooks/useAuth";
 
-
 const DashboardPage = () => {
-  const {
-    user,
-    logout,
-  } = useAuth();
-
+  const { user } = useAuth();
 
   return (
-    <div>
-      <h1>Researcify Studio</h1>
+    <section>
 
-      <h2>
-        Welcome, {user?.name}
-      </h2>
-
-      <p>
-        {user?.email}
-      </p>
+      <h1>
+        Welcome back, {user?.name}
+      </h1>
 
       <p>
-        Academic Field: {user?.academicField}
+        Your research workspace is ready.
       </p>
 
-      <button onClick={logout}>
-        Logout
-      </button>
-    </div>
+
+      <div>
+
+        <h3>Account</h3>
+
+        <p>
+          Email: {user?.email}
+        </p>
+
+        <p>
+          Academic Field:{" "}
+          {user?.academicField}
+        </p>
+
+      </div>
+
+
+      <div>
+
+        <h3>Research Interests</h3>
+
+        {user?.researchInterests?.length ? (
+
+          <ul>
+            {user.researchInterests.map(
+              (interest) => (
+                <li key={interest}>
+                  {interest}
+                </li>
+              )
+            )}
+          </ul>
+
+        ) : (
+
+          <p>
+            No research interests added.
+          </p>
+
+        )}
+
+      </div>
+
+    </section>
   );
 };
-
 
 export default DashboardPage;

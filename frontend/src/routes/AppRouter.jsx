@@ -7,8 +7,12 @@ import {
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 
+import AuthLayout from "../layouts/AuthLayout";
+import AppLayout from "../layouts/AppLayout";
+
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+
 import DashboardPage from "../pages/DashboardPage";
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -16,8 +20,6 @@ import NotFoundPage from "../pages/NotFoundPage";
 const AppRouter = () => {
   return (
     <Routes>
-
-      {/* Root */}
 
       <Route
         path="/"
@@ -30,36 +32,50 @@ const AppRouter = () => {
       />
 
 
-      {/* Public only */}
+      {/* ========================
+          PUBLIC AUTH ROUTES
+      ======================== */}
 
       <Route element={<PublicRoute />}>
 
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+        <Route element={<AuthLayout />}>
 
-        <Route
-          path="/register"
-          element={<RegisterPage />}
-        />
+          <Route
+            path="/login"
+            element={<LoginPage />}
+          />
+
+          <Route
+            path="/register"
+            element={<RegisterPage />}
+          />
+
+        </Route>
 
       </Route>
 
 
-      {/* Protected */}
+      {/* ========================
+          PROTECTED APP ROUTES
+      ======================== */}
 
       <Route element={<ProtectedRoute />}>
 
-        <Route
-          path="/dashboard"
-          element={<DashboardPage />}
-        />
+        <Route element={<AppLayout />}>
+
+          <Route
+            path="/dashboard"
+            element={<DashboardPage />}
+          />
+
+        </Route>
 
       </Route>
 
 
-      {/* 404 */}
+      {/* ========================
+          NOT FOUND
+      ======================== */}
 
       <Route
         path="*"
