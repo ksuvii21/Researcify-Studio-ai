@@ -15,7 +15,6 @@ router.post('/login', login);
 router.post('/logout', logout);
 
 //Define the GET route for retrieving the current user, which calls the getMe controller function
-router.get('/me', verifyToken, getMe);
 
 //Export the router instance
 module.exports = router;

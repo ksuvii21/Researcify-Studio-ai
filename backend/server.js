@@ -1,30 +1,78 @@
-const express = require('express');
+require("dotenv").config();
+
+const express = require("express");
+const cors = require("cors");
+
+const connectDB = require("./config/db");
+
+const authRoutes = require("./routes/authRoutes");
+const paperRoutes = require("./routes/paperRoutes");
+
 const app = express();
-const PORT = process.env.PORT || 3000;
-const authRoutes = require('./routes/authRoutes');
 
-// Mount using the exact versioned prefix requested
-app.use('/api/v1/auth', authRoutes);
+const PORT = process.env.PORT || 5000;
 
-// Middleware to parse JSON request bodies
+
+// ================================
+// DATABASE
+// ================================
+
+connectDB();
+
+
+// ================================
+// GLOBAL MIDDLEWARE
+// ================================
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-// 1. Basic GET route
-app.get('/', (req, res) => {
-    res.send('Hello, World! Your server is up and running.');
+app.use(express.urlencoded({ extended: true }));
+
+
+// ================================
+// HEALTH ROUTES
+// ================================
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Researcify Studio API",
+  });
 });
 
-//2. Sample JSON API Route
-app.get('/api/status', (req, res) => {
-    res.json({ status: 'Server is running', message: 'Server is healthy', timestamp: new Date() });
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Researcify Studio API is running",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+  });
 });
 
-//Start the server
+
+// ================================
+// API ROUTES
+// ================================
+
+app.use("/api/v1/auth", authRoutes);
+
+app.use("/api/v1", paperRoutes);
+
+
+// ================================
+// START SERVER
+// ================================
+
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
-
-// GET /api/health - Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'true', message: 'Researchify Studio API is running', timestamp: new Date() });
+  console.log(
+    `Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`
+  );
 });

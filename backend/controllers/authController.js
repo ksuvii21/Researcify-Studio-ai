@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 exports.register = async (req, res) => {
     try{
         //Extract name, email, and password from the request body
-        const {name, email, password} = req.body;
+        const {name, email, password, academicField} = req.body;
 
         //Check if a user with the provided email already exists in the database
         const existingUser = await User.findOne({email});
@@ -27,7 +27,8 @@ exports.register = async (req, res) => {
         const newUser = new User({
             name, 
             email, 
-            password: hashedPassword
+            password: hashedPassword,
+            academicField
         });
 
         //Save the new user to the database
@@ -59,7 +60,7 @@ exports.login = async(req, res) => {
         }
 
         //Compare the submitted plain-text password with the stored hashed password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
         if(!isMatch){
             //If the passwords do not match, return a 400 status code with an error message
             return res.status(400).json({message: 'Invalid email or password.'});
@@ -91,7 +92,7 @@ exports.logout = async (req, res) => {
 exports.getMe = async (req, res) => {
     try{
         //req.user.id comes from your verifyToken middleware
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user.id).select('-passwordHash');
 
         if(!user){
             return res.status(404).json({success: false, message: 'User not found.'});
