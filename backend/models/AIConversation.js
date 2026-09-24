@@ -57,7 +57,7 @@ const aiConversationSchema = new mongoose.Schema({
             references: [
                 {
                     type: mongoose.Schema.Types.ObjectId,
-                    ref: 'DocumentChunk',
+                    ref: 'RecordChunk',
                 },
             ],
         },

@@ -31,7 +31,7 @@ const noteSchema = new mongoose.Schema({
     },
     projectId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project',
+        ref: 'ResearchProject',
         default: null,
         index: true, // Index for faster queries
     },

@@ -1,20 +1,29 @@
-//Import the express library
-const express = require('express');
-//Create a new router instance
+const express = require("express");
+
+const {
+  register,
+  login,
+  logout,
+  getMe,
+} = require("../controllers/authController");
+
+const verifyToken = require("../middleware/auth");
+
 const router = express.Router();
-//Import the register and login controller functions from the authController
-const {register, login, logout, getMe} = require('../controllers/authController');
 
-//Define the POST route for user registration, which calls the register controller function
-router.post('/register', register);
 
-//Define the POST route for user login, which calls the login controller function
-router.post('/login', login);
+// Public routes
 
-//Define the POST route for user logout, which calls the logout controller function
-router.post('/logout', logout);
+router.post("/register", register);
 
-//Define the GET route for retrieving the current user, which calls the getMe controller function
+router.post("/login", login);
 
-//Export the router instance
+
+// Protected routes
+
+router.get("/me", verifyToken, getMe);
+
+router.post("/logout", verifyToken, logout);
+
+
 module.exports = router;
