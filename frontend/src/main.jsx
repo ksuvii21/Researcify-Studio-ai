@@ -4,23 +4,35 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import App from "./App.jsx";
+
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
+import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
 
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3500,
-          }}
-        />
-      </AuthProvider>
+      <ThemeProvider>
+
+        <AuthProvider>
+          <ErrorBoundary>
+            <App />
+          </ErrorBoundary>
+
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3500,
+            }}
+          />
+
+        </AuthProvider>
+
+      </ThemeProvider>
+
     </BrowserRouter>
   </StrictMode>
 );

@@ -61,6 +61,10 @@ apiClient.interceptors.response.use(
      */
     if (status === 401) {
       removeToken();
+
+      window.dispatchEvent(
+        new Event("auth:unauthorized")
+      );
     }
 
     const normalizedError = new Error(message);

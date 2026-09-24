@@ -29,6 +29,25 @@ export const AuthProvider = ({ children }) => {
   // True while we're checking an existing login session
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+  const handleUnauthorized = () => {
+    removeToken();
+    setUser(null);
+  };
+
+  window.addEventListener(
+    "auth:unauthorized",
+    handleUnauthorized
+  );
+
+  return () => {
+    window.removeEventListener(
+      "auth:unauthorized",
+      handleUnauthorized
+    );
+  };
+}, []);
+
 
   // ==========================================
   // RESTORE EXISTING SESSION

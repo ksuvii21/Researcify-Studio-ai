@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { LogOut } from "lucide-react";
 
 import useAuth from "../hooks/useAuth";
+import ThemeToggle from "../components/common/ThemeToggle";
 
 const AppLayout = () => {
   const { user, logout } = useAuth();
@@ -25,16 +26,24 @@ const AppLayout = () => {
 
           <div>
             <strong>{user?.name}</strong>
-
             <p>{user?.academicField}</p>
           </div>
 
-          <button onClick={logout}>
-            <LogOut size={18} />
-            Logout
+          <div className="header-actions">
+
+          <ThemeToggle />
+
+          <button
+            className="logout-button"
+            onClick={logout}
+          >
+          <LogOut size={18} />
+          Logout
           </button>
 
-        </header>
+        </div>
+
+      </header>
 
         <main className="app-content">
           <Outlet />
