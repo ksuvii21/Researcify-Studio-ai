@@ -7,6 +7,8 @@ const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const paperRoutes = require("./routes/paperRoutes");
+const notFound = require("./middleware/notFound");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -65,6 +67,19 @@ app.get("/api/health", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 
 app.use("/api/v1", paperRoutes);
+
+// ================================
+// 404 HANDLER
+// ================================
+
+app.use(notFound);
+
+
+// ================================
+// GLOBAL ERROR HANDLER
+// ================================
+
+app.use(errorHandler);
 
 
 // ================================
