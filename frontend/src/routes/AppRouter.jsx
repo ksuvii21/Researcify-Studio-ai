@@ -10,6 +10,8 @@ import PublicRoute from "./PublicRoute";
 import AuthLayout from "../layouts/AuthLayout";
 import AppLayout from "../layouts/AppLayout";
 
+import LandingPage from "../pages/LandingPage";
+
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 
@@ -20,6 +22,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 const AppRouter = () => {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
 
       <Route
         path="/"
