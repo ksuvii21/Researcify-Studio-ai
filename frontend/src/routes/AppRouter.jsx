@@ -19,6 +19,8 @@ import NotesPage from "../pages/NotesPage";
 import NoteEditorPage from "../pages/NoteEditorPage";
 import AIAssistantPage from "../pages/AIAssistantPage";
 import UploadsPage from "../pages/UploadsPage";
+import CollectionsPage from "../pages/CollectionsPage";
+import CollectionDetailPage from "../pages/CollectionDetailPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -111,14 +113,15 @@ const AppRouter = () => {
             element={<UploadsPage />}
           />
 
-          {/* Phase 7G */}
-          {/*
           <Route
             path="/collections"
             element={<CollectionsPage />}
           />
-          */}
-
+          <Route
+            path="/collections/:collectionId"
+            element={<CollectionDetailPage />}
+          />
+          
           {/* Phase 7H */}
           {/*
           <Route
