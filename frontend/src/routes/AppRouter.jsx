@@ -14,6 +14,7 @@ import DashboardPage from "../pages/DashboardPage";
 import DiscoverPage from "../pages/DiscoverPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ProjectDetailPage from "../pages/ProjectDetailPage";
+import LibraryPage from "../pages/LibraryPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -82,14 +83,10 @@ const AppRouter = () => {
             path="/projects/:id"
             element={<ProjectDetailPage />}
           />
-
-          {/* Phase 7C */}
-          {/*
           <Route
             path="/library"
             element={<LibraryPage />}
           />
-          */}
 
           {/* Phase 7D */}
           {/*
