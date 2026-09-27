@@ -1,56 +1,88 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-import useAuth from "../hooks/useAuth";
-import ThemeToggle from "../components/common/ThemeToggle";
+import DashboardSidebar from "../components/dashboard/DashboardSidebar";
+import DashboardTopbar from "../components/dashboard/DashboardTopbar";
+
+import "../components/dashboard/dashboard-shell.css";
+
+const SIDEBAR_STORAGE_KEY =
+  "researcify-sidebar-collapsed";
 
 const AppLayout = () => {
-  const { user, logout } = useAuth();
+  const [collapsed, setCollapsed] = useState(() => {
+    return (
+      localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true"
+    );
+  });
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setCollapsed((current) => !current);
+  };
+
+  useEffect(() => {
+    localStorage.setItem(
+      SIDEBAR_STORAGE_KEY,
+      String(collapsed)
+    );
+  }, [collapsed]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 900) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const handleCreateAction = (action) => {
+    /*
+      Phase 5 will connect these actions to:
+      - project modal
+      - note modal
+      - upload modal
+      - collection modal
+      - import modal
+      - AI conversation
+
+      Keeping this handler here means the Topbar does not
+      need to know how those modals work.
+    */
+
+    console.log("[Create Action]", action);
+  };
 
   return (
-    <div className="app-layout">
+    <div
+      className={`dashboard-shell ${
+        collapsed ? "sidebar-collapsed" : ""
+      }`}
+    >
+      <DashboardSidebar
+        collapsed={collapsed}
+        onToggle={toggleSidebar}
+        mobileOpen={mobileOpen}
+        onMobileClose={() => setMobileOpen(false)}
+      />
 
-      <aside className="sidebar">
-        <h2>Researcify</h2>
+      <div className="dashboard-shell__main">
+        <DashboardTopbar
+          onMobileMenuOpen={() => setMobileOpen(true)}
+          onCreateAction={handleCreateAction}
+        />
 
-        <nav>
-          <NavLink to="/dashboard">
-            Dashboard
-          </NavLink>
-        </nav>
-      </aside>
-
-      <div className="app-main">
-
-        <header className="app-header">
-
-          <div>
-            <strong>{user?.name}</strong>
-            <p>{user?.academicField}</p>
-          </div>
-
-          <div className="header-actions">
-
-          <ThemeToggle />
-
-          <button
-            className="logout-button"
-            onClick={logout}
-          >
-          <LogOut size={18} />
-          Logout
-          </button>
-
-        </div>
-
-      </header>
-
-        <main className="app-content">
+        <main className="dashboard-shell__content">
           <Outlet />
         </main>
-
       </div>
-
     </div>
   );
 };
