@@ -17,6 +17,7 @@ import ProjectDetailPage from "../pages/ProjectDetailPage";
 import LibraryPage from "../pages/LibraryPage";
 import NotesPage from "../pages/NotesPage";
 import NoteEditorPage from "../pages/NoteEditorPage";
+import AIAssistantPage from "../pages/AIAssistantPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -99,13 +100,10 @@ const AppRouter = () => {
             element={<NoteEditorPage />}
           />
 
-          {/* Phase 7E */}
-          {/*
           <Route
             path="/ai-assistant"
             element={<AIAssistantPage />}
           />
-          */}
 
           {/* Phase 7F */}
           {/*
