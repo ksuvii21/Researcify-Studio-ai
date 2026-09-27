@@ -24,16 +24,6 @@ const AppRouter = () => {
     <Routes>
       <Route path="/" element={<LandingPage />} />
 
-      <Route
-        path="/"
-        element={
-          <Navigate
-            to="/dashboard"
-            replace
-          />
-        }
-      />
-
 
       {/* ========================
           PUBLIC AUTH ROUTES
