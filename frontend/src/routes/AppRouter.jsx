@@ -12,6 +12,8 @@ import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 
 import DashboardPage from "../pages/DashboardPage";
 import DiscoverPage from "../pages/DiscoverPage";
+import ProjectsPage from "../pages/ProjectsPage";
+import ProjectDetailPage from "../pages/ProjectDetailPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -71,14 +73,15 @@ const AppRouter = () => {
             path="/discover"
             element={<DiscoverPage />}
           />
-
-          {/* Phase 7B */}
-          {/* 
+           
           <Route
             path="/projects"
             element={<ProjectsPage />}
           />
-          */}
+          <Route
+            path="/projects/:id"
+            element={<ProjectDetailPage />}
+          />
 
           {/* Phase 7C */}
           {/*
