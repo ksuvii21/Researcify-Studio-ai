@@ -22,6 +22,8 @@ import UploadsPage from "../pages/UploadsPage";
 import CollectionsPage from "../pages/CollectionsPage";
 import CollectionDetailPage from "../pages/CollectionDetailPage";
 import ResearchActivityPage from "../pages/ResearchActivityPage";
+import SettingsPage from "../pages/SettingsPage";
+import HelpPage from "../pages/HelpPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -128,14 +130,15 @@ const AppRouter = () => {
             element={<ResearchActivityPage />}
           />
           
-
-          {/* Phase 7I */}
-          {/*
           <Route
             path="/settings"
             element={<SettingsPage />}
           />
-          */}
+          
+          <Route 
+          path="/help"
+          element={<HelpPage />}
+          />
         </Route>
       </Route>
 
