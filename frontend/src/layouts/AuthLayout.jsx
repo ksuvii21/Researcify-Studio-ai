@@ -1,21 +1,28 @@
 import { Outlet } from "react-router-dom";
+import AuthBrandPanel from "../components/auth/AuthBrandPanel";
+import ThemeToggle from "../components/common/ThemeToggle";
+
+import "../components/auth/auth.css";
 
 const AuthLayout = () => {
   return (
-    <main className="auth-layout">
-      <section className="auth-brand">
-        <h1>Researcify Studio</h1>
+    <div className="auth-layout">
+      <AuthBrandPanel />
 
-        <p>
-          Your AI-powered workspace for discovering,
-          organizing and understanding research.
-        </p>
-      </section>
+      <main className="auth-layout__main">
+        <div className="auth-layout__theme">
+          <ThemeToggle />
+        </div>
 
-      <section className="auth-content">
-        <Outlet />
-      </section>
-    </main>
+        <div className="auth-layout__form">
+          <Outlet />
+        </div>
+
+        <div className="auth-layout__copyright">
+          © {new Date().getFullYear()} Researcify Studio
+        </div>
+      </main>
+    </div>
   );
 };
 

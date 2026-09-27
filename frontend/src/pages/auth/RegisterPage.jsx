@@ -1,239 +1,276 @@
+import {
+  ArrowRight,
+  Mail,
+  UserRound,
+} from "lucide-react";
+
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 
+import AuthInput from "../../components/auth/AuthInput";
+import PasswordInput from "../../components/auth/PasswordInput";
+import PasswordStrength from "../../components/auth/PasswordStrength";
+
+const initialForm = {
+  name: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  agree: false,
+};
+
 const RegisterPage = () => {
+  const auth = useAuth();
   const navigate = useNavigate();
 
-  const { register } = useAuth();
+  const [form, setForm] =
+    useState(initialForm);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    academicField: "",
-    researchInterests: "",
-  });
+  const [errors, setErrors] = useState({});
+  const [serverError, setServerError] =
+    useState("");
 
   const [submitting, setSubmitting] =
     useState(false);
 
+  const updateField = (event) => {
+    const {
+      name,
+      value,
+      type,
+      checked,
+    } = event.target;
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setFormData((previous) => ({
-      ...previous,
-      [name]: value,
+    setForm((current) => ({
+      ...current,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
     }));
+
+    setErrors((current) => ({
+      ...current,
+      [name]: "",
+    }));
+
+    setServerError("");
   };
 
+  const validate = () => {
+    const nextErrors = {};
+
+    if (form.name.trim().length < 2) {
+      nextErrors.name =
+        "Enter your full name.";
+    }
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        form.email
+      )
+    ) {
+      nextErrors.email =
+        "Enter a valid email address.";
+    }
+
+    if (form.password.length < 8) {
+      nextErrors.password =
+        "Password must contain at least 8 characters.";
+    }
+
+    if (
+      form.confirmPassword !==
+      form.password
+    ) {
+      nextErrors.confirmPassword =
+        "Passwords do not match.";
+    }
+
+    if (!form.agree) {
+      nextErrors.agree =
+        "You must accept the terms to continue.";
+    }
+
+    setErrors(nextErrors);
+
+    return (
+      Object.keys(nextErrors).length === 0
+    );
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.academicField
-    ) {
-      toast.error(
-        "Please complete all required fields."
-      );
+    if (!validate()) return;
 
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast.error(
-        "Password must be at least 6 characters."
-      );
-
-      return;
-    }
-
-
-    const interests = formData.researchInterests
-      .split(",")
-      .map((interest) => interest.trim())
-      .filter(Boolean);
-
-
-    const payload = {
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      password: formData.password,
-      academicField:
-        formData.academicField.trim(),
-      researchInterests: interests,
-    };
-
+    setSubmitting(true);
+    setServerError("");
 
     try {
-
-      setSubmitting(true);
-
-      const response =
-        await register(payload);
-
-      toast.success(
-        response.message ||
-        "Account created successfully."
-      );
+      await auth.register({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      });
 
       navigate("/dashboard", {
         replace: true,
       });
-
     } catch (error) {
-
-      toast.error(
-        error.message ||
-        "Unable to create account."
+      setServerError(
+        error?.message ||
+          "Unable to create your account."
       );
-
     } finally {
-
       setSubmitting(false);
-
     }
   };
 
-
   return (
-    <div className="auth-card">
+    <section className="auth-card">
+      <div className="auth-card__heading">
+        <span className="auth-card__eyebrow">
+          Start researching smarter
+        </span>
 
-      <div className="auth-card-header">
-
-        <h2>Create your account</h2>
+        <h1>Create your account</h1>
 
         <p>
-          Start building your research workspace.
+          Build your intelligent research
+          workspace in minutes.
         </p>
-
       </div>
 
+      {serverError && (
+        <div
+          className="auth-alert auth-alert--error"
+          role="alert"
+        >
+          {serverError}
+        </div>
+      )}
 
       <form
-        onSubmit={handleSubmit}
         className="auth-form"
+        onSubmit={handleSubmit}
+        noValidate
       >
+        <AuthInput
+          id="register-name"
+          label="Full Name"
+          icon={UserRound}
+          name="name"
+          value={form.name}
+          onChange={updateField}
+          placeholder="Your full name"
+          autoComplete="name"
+          error={errors.name}
+          required
+        />
 
-        <div className="form-group">
+        <AuthInput
+          id="register-email"
+          label="Email Address"
+          icon={Mail}
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={updateField}
+          placeholder="researcher@example.com"
+          autoComplete="email"
+          error={errors.email}
+          required
+        />
 
-          <label htmlFor="name">
-            Full Name
+        <PasswordInput
+          id="register-password"
+          label="Password"
+          name="password"
+          value={form.password}
+          onChange={updateField}
+          placeholder="Create a secure password"
+          autoComplete="new-password"
+          error={errors.password}
+          required
+        />
+
+        <PasswordStrength
+          password={form.password}
+        />
+
+        <PasswordInput
+          id="confirm-password"
+          label="Confirm Password"
+          name="confirmPassword"
+          value={form.confirmPassword}
+          onChange={updateField}
+          placeholder="Repeat your password"
+          autoComplete="new-password"
+          error={errors.confirmPassword}
+          required
+        />
+
+        <div>
+          <label className="auth-checkbox auth-checkbox--terms">
+            <input
+              type="checkbox"
+              name="agree"
+              checked={form.agree}
+              onChange={updateField}
+            />
+
+            <span>
+              I agree to the{" "}
+              <a href="/terms">
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a href="/privacy">
+                Privacy Policy
+              </a>
+              .
+            </span>
           </label>
 
-          <input
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Your name"
-          />
-
+          {errors.agree && (
+            <small className="auth-field__error">
+              {errors.agree}
+            </small>
+          )}
         </div>
-
-
-        <div className="form-group">
-
-          <label htmlFor="email">
-            Email
-          </label>
-
-          <input
-            id="email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="you@example.com"
-          />
-
-        </div>
-
-
-        <div className="form-group">
-
-          <label htmlFor="password">
-            Password
-          </label>
-
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Minimum 6 characters"
-          />
-
-        </div>
-
-
-        <div className="form-group">
-
-          <label htmlFor="academicField">
-            Academic Field
-          </label>
-
-          <input
-            id="academicField"
-            name="academicField"
-            value={formData.academicField}
-            onChange={handleChange}
-            placeholder="e.g. Computer Science"
-          />
-
-        </div>
-
-
-        <div className="form-group">
-
-          <label htmlFor="researchInterests">
-            Research Interests
-          </label>
-
-          <input
-            id="researchInterests"
-            name="researchInterests"
-            value={formData.researchInterests}
-            onChange={handleChange}
-            placeholder="AI, Machine Learning, NLP"
-          />
-
-          <small>
-            Separate interests using commas.
-          </small>
-
-        </div>
-
 
         <button
           type="submit"
+          className="auth-submit"
           disabled={submitting}
         >
           {submitting
             ? "Creating account..."
             : "Create Account"}
-        </button>
 
+          {!submitting && (
+            <ArrowRight size={16} />
+          )}
+        </button>
       </form>
 
-
-      <p className="auth-switch">
-        Already have an account?{" "}
+      <div className="auth-card__switch">
+        <span>
+          Already have an account?
+        </span>
 
         <Link to="/login">
           Sign in
         </Link>
-      </p>
-
-    </div>
+      </div>
+    </section>
   );
 };
 

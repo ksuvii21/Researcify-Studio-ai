@@ -14,6 +14,7 @@ import LandingPage from "../pages/LandingPage";
 
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 
 import DashboardPage from "../pages/DashboardPage";
 import NotFoundPage from "../pages/NotFoundPage";
@@ -43,6 +44,10 @@ const AppRouter = () => {
             element={<RegisterPage />}
           />
 
+          <Route
+            path="/forgot-password"
+            element={<ForgotPasswordPage />}
+          />
         </Route>
 
       </Route>
