@@ -6,6 +6,7 @@ import {
   NotebookPen,
   Upload,
 } from "lucide-react";
+import useCreateAction from "../../../hooks/useCreateAction";
 
 const actions = [
   {
@@ -47,9 +48,8 @@ const actions = [
 ];
 
 const QuickActions = () => {
-  const handleAction = (id) => {
-    console.log("[Quick Action]", id);
-  };
+    const { handleAction } =
+    useCreateAction();
 
   return (
     <section className="dashboard-section">

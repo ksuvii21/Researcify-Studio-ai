@@ -6,11 +6,13 @@ import GlobalSearch from "./GlobalSearch";
 import CreateMenu from "./CreateMenu";
 import NotificationMenu from "./NotificationMenu";
 import ProfileMenu from "./ProfileMenu";
+import useCreateAction from "../../hooks/useCreateAction";
 
 const DashboardTopbar = ({
-  onMobileMenuOpen,
-  onCreateAction,
+  onMobileMenuOpen
 }) => {
+  const { handleAction } =
+    useCreateAction();
   const [activeMenu, setActiveMenu] = useState(null);
 
   const toggleMenu = (menu) => {
@@ -41,7 +43,7 @@ const DashboardTopbar = ({
           open={activeMenu === "create"}
           onToggle={() => toggleMenu("create")}
           onClose={closeMenus}
-          onAction={onCreateAction}
+          onAction={handleAction}
         />
 
         <ThemeToggle />

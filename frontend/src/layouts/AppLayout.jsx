@@ -1,33 +1,69 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import { Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
 
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 import DashboardTopbar from "../components/dashboard/DashboardTopbar";
 
+import CreateActionHost from "../components/dashboard/interactions/CreateActionHost";
+import ToastContainer from "../components/common/ToastContainer";
+
+import {
+  CreateActionProvider,
+} from "../context/CreateActionContext";
+
+import {
+  ToastProvider,
+} from "../context/ToastContext";
+
 import "../components/dashboard/dashboard-shell.css";
+import "../components/dashboard/interactions/interactions.css";
+
 
 const SIDEBAR_STORAGE_KEY =
   "researcify-sidebar-collapsed";
 
-const AppLayout = () => {
-  const [collapsed, setCollapsed] = useState(() => {
-    return (
-      localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true"
-    );
-  });
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+const DashboardApplication = () => {
+  const [collapsed, setCollapsed] =
+    useState(() => {
+      try {
+        return (
+          localStorage.getItem(
+            SIDEBAR_STORAGE_KEY
+          ) === "true"
+        );
+      } catch {
+        return false;
+      }
+    });
 
-  const toggleSidebar = () => {
-    setCollapsed((current) => !current);
-  };
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
+
+
+  /* =====================================
+     SAVE SIDEBAR STATE
+  ===================================== */
 
   useEffect(() => {
-    localStorage.setItem(
-      SIDEBAR_STORAGE_KEY,
-      String(collapsed)
-    );
+    try {
+      localStorage.setItem(
+        SIDEBAR_STORAGE_KEY,
+        String(collapsed)
+      );
+    } catch {
+      // Ignore localStorage errors.
+    }
   }, [collapsed]);
+
+
+  /* =====================================
+     CLOSE MOBILE SIDEBAR ON RESIZE
+  ===================================== */
 
   useEffect(() => {
     const handleResize = () => {
@@ -36,54 +72,93 @@ const AppLayout = () => {
       }
     };
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener(
+      "resize",
+      handleResize
+    );
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener(
+        "resize",
+        handleResize
+      );
     };
   }, []);
 
-  const handleCreateAction = (action) => {
-    /*
-      Phase 5 will connect these actions to:
-      - project modal
-      - note modal
-      - upload modal
-      - collection modal
-      - import modal
-      - AI conversation
 
-      Keeping this handler here means the Topbar does not
-      need to know how those modals work.
-    */
+  /* =====================================
+     SIDEBAR HANDLERS
+  ===================================== */
 
-    console.log("[Create Action]", action);
+  const handleSidebarToggle = () => {
+    setCollapsed(
+      (current) => !current
+    );
   };
+
+  const handleMobileOpen = () => {
+    setMobileOpen(true);
+  };
+
+  const handleMobileClose = () => {
+    setMobileOpen(false);
+  };
+
+
+  /* =====================================
+     DASHBOARD
+  ===================================== */
 
   return (
     <div
       className={`dashboard-shell ${
-        collapsed ? "sidebar-collapsed" : ""
+        collapsed
+          ? "sidebar-collapsed"
+          : ""
       }`}
     >
       <DashboardSidebar
         collapsed={collapsed}
-        onToggle={toggleSidebar}
         mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
+        onToggle={
+          handleSidebarToggle
+        }
+        onMobileClose={
+          handleMobileClose
+        }
       />
 
       <div className="dashboard-shell__main">
         <DashboardTopbar
-          onMobileMenuOpen={() => setMobileOpen(true)}
-          onCreateAction={handleCreateAction}
+          onMobileMenu={
+            handleMobileOpen
+          }
         />
 
         <main className="dashboard-shell__content">
           <Outlet />
         </main>
       </div>
+
+      <CreateActionHost />
+
+      <ToastContainer />
     </div>
+  );
+};
+
+
+/* =====================================
+   PROVIDERS
+===================================== */
+
+const AppLayout = () => {
+  return (
+    <ToastProvider>
+      <CreateActionProvider>
+        <DashboardApplication />
+      </CreateActionProvider>
+    </ToastProvider>
   );
 };
 
