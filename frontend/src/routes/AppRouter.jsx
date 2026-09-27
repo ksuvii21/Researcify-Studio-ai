@@ -21,6 +21,7 @@ import AIAssistantPage from "../pages/AIAssistantPage";
 import UploadsPage from "../pages/UploadsPage";
 import CollectionsPage from "../pages/CollectionsPage";
 import CollectionDetailPage from "../pages/CollectionDetailPage";
+import ResearchActivityPage from "../pages/ResearchActivityPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -121,14 +122,12 @@ const AppRouter = () => {
             path="/collections/:collectionId"
             element={<CollectionDetailPage />}
           />
-          
-          {/* Phase 7H */}
-          {/*
+         
           <Route
             path="/activity"
-            element={<ActivityPage />}
+            element={<ResearchActivityPage />}
           />
-          */}
+          
 
           {/* Phase 7I */}
           {/*
