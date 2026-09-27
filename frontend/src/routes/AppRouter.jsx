@@ -18,6 +18,7 @@ import LibraryPage from "../pages/LibraryPage";
 import NotesPage from "../pages/NotesPage";
 import NoteEditorPage from "../pages/NoteEditorPage";
 import AIAssistantPage from "../pages/AIAssistantPage";
+import UploadsPage from "../pages/UploadsPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -105,13 +106,10 @@ const AppRouter = () => {
             element={<AIAssistantPage />}
           />
 
-          {/* Phase 7F */}
-          {/*
           <Route
             path="/uploads"
-            element={<UploadedDocumentsPage />}
+            element={<UploadsPage />}
           />
-          */}
 
           {/* Phase 7G */}
           {/*
