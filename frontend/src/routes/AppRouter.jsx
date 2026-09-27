@@ -4,12 +4,6 @@ import {
   Routes,
 } from "react-router-dom";
 
-import ProtectedRoute from "./ProtectedRoute";
-import PublicRoute from "./PublicRoute";
-
-import AuthLayout from "../layouts/AuthLayout";
-import AppLayout from "../layouts/AppLayout";
-
 import LandingPage from "../pages/LandingPage";
 
 import LoginPage from "../pages/auth/LoginPage";
@@ -17,23 +11,34 @@ import RegisterPage from "../pages/auth/RegisterPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 
 import DashboardPage from "../pages/DashboardPage";
+import DiscoverPage from "../pages/DiscoverPage";
+
 import NotFoundPage from "../pages/NotFoundPage";
 
+import AppLayout from "../layouts/AppLayout";
+import AuthLayout from "../layouts/AuthLayout";
+
+import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
 
 const AppRouter = () => {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      {/* ============================= */}
+      {/* LANDING */}
+      {/* ============================= */}
 
+      <Route
+        path="/"
+        element={<LandingPage />}
+      />
 
-      {/* ========================
-          PUBLIC AUTH ROUTES
-      ======================== */}
+      {/* ============================= */}
+      {/* AUTH */}
+      {/* ============================= */}
 
       <Route element={<PublicRoute />}>
-
         <Route element={<AuthLayout />}>
-
           <Route
             path="/login"
             element={<LoginPage />}
@@ -49,40 +54,100 @@ const AppRouter = () => {
             element={<ForgotPasswordPage />}
           />
         </Route>
-
       </Route>
 
-
-      {/* ========================
-          PROTECTED APP ROUTES
-      ======================== */}
+      {/* ============================= */}
+      {/* PROTECTED APPLICATION */}
+      {/* ============================= */}
 
       <Route element={<ProtectedRoute />}>
-
         <Route element={<AppLayout />}>
-
           <Route
             path="/dashboard"
             element={<DashboardPage />}
           />
 
-        </Route>
+          <Route
+            path="/discover"
+            element={<DiscoverPage />}
+          />
 
+          {/* Phase 7B */}
+          {/* 
+          <Route
+            path="/projects"
+            element={<ProjectsPage />}
+          />
+          */}
+
+          {/* Phase 7C */}
+          {/*
+          <Route
+            path="/library"
+            element={<LibraryPage />}
+          />
+          */}
+
+          {/* Phase 7D */}
+          {/*
+          <Route
+            path="/notes"
+            element={<NotesPage />}
+          />
+          */}
+
+          {/* Phase 7E */}
+          {/*
+          <Route
+            path="/ai-assistant"
+            element={<AIAssistantPage />}
+          />
+          */}
+
+          {/* Phase 7F */}
+          {/*
+          <Route
+            path="/uploads"
+            element={<UploadedDocumentsPage />}
+          />
+          */}
+
+          {/* Phase 7G */}
+          {/*
+          <Route
+            path="/collections"
+            element={<CollectionsPage />}
+          />
+          */}
+
+          {/* Phase 7H */}
+          {/*
+          <Route
+            path="/activity"
+            element={<ActivityPage />}
+          />
+          */}
+
+          {/* Phase 7I */}
+          {/*
+          <Route
+            path="/settings"
+            element={<SettingsPage />}
+          />
+          */}
+        </Route>
       </Route>
 
-
-      {/* ========================
-          NOT FOUND
-      ======================== */}
+      {/* ============================= */}
+      {/* FALLBACK */}
+      {/* ============================= */}
 
       <Route
         path="*"
         element={<NotFoundPage />}
       />
-
     </Routes>
   );
 };
-
 
 export default AppRouter;
