@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -7,69 +8,41 @@ import {
 
 export const ThemeContext = createContext(null);
 
-const THEME_KEY = "researcify_theme";
+const THEME_KEY = "researcify-theme";
 
 const getInitialTheme = () => {
   const savedTheme = localStorage.getItem(THEME_KEY);
 
-  if (
-    savedTheme === "light" ||
-    savedTheme === "dark" ||
-    savedTheme === "system"
-  ) {
+  if (savedTheme === "dark" || savedTheme === "light") {
     return savedTheme;
   }
 
-  return "system";
+  return "dark";
 };
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(getInitialTheme);
 
-  const [systemTheme, setSystemTheme] = useState(
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light"
-  );
-
   useEffect(() => {
-    const mediaQuery = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    );
-
-    const handleChange = (event) => {
-      setSystemTheme(event.matches ? "dark" : "light");
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => {
-      mediaQuery.removeEventListener(
-        "change",
-        handleChange
-      );
-    };
-  }, []);
-
-  const resolvedTheme =
-    theme === "system" ? systemTheme : theme;
-
-  useEffect(() => {
-    document.documentElement.setAttribute(
-      "data-theme",
-      resolvedTheme
-    );
-
+    document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem(THEME_KEY, theme);
-  }, [theme, resolvedTheme]);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((currentTheme) =>
+      currentTheme === "dark" ? "light" : "dark"
+    );
+  }, []);
 
   const value = useMemo(
     () => ({
       theme,
-      resolvedTheme,
+      isDark: theme === "dark",
+      isLight: theme === "light",
       setTheme,
+      toggleTheme,
     }),
-    [theme, resolvedTheme]
+    [theme, toggleTheme]
   );
 
   return (

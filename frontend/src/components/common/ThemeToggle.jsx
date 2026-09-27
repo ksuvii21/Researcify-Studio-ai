@@ -1,51 +1,24 @@
-import {
-  Monitor,
-  Moon,
-  Sun,
-} from "lucide-react";
-
+import { Moon, Sun } from "lucide-react";
 import useTheme from "../../hooks/useTheme";
+import "./ThemeToggle.css";
 
-const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+const ThemeToggle = ({ className = "" }) => {
+  const { isDark, toggleTheme } = useTheme();
 
   return (
-    <div className="theme-toggle">
-
-      <button
-        type="button"
-        onClick={() => setTheme("light")}
-        className={
-          theme === "light" ? "active" : ""
-        }
-        title="Light theme"
-      >
-        <Sun size={17} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setTheme("dark")}
-        className={
-          theme === "dark" ? "active" : ""
-        }
-        title="Dark theme"
-      >
-        <Moon size={17} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setTheme("system")}
-        className={
-          theme === "system" ? "active" : ""
-        }
-        title="System theme"
-      >
-        <Monitor size={17} />
-      </button>
-
-    </div>
+    <button
+      type="button"
+      className={`theme-toggle ${className}`}
+      onClick={toggleTheme}
+      aria-label={
+        isDark ? "Switch to light theme" : "Switch to dark theme"
+      }
+      title={isDark ? "Light theme" : "Dark theme"}
+    >
+      <span className="theme-toggle-icon">
+        {isDark ? <Sun size={18} /> : <Moon size={18} />}
+      </span>
+    </button>
   );
 };
 

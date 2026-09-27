@@ -1,0 +1,28 @@
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+  flex-wrap: wrap;
+
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  font-size: 18.5px;
+}
+
+.section-header p {
+  margin-top: 3px;
+
+  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.section-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

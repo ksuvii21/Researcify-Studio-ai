@@ -1,0 +1,106 @@
+:root {
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.22);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.28);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.3);
+
+  --transition-fast: 140ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --sidebar-width: 264px;
+  --sidebar-collapsed-width: 84px;
+
+  --font-heading: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+/* =========================
+   DARK THEME
+========================= */
+
+[data-theme="dark"] {
+  --bg: #0d1321;
+  --bg-alt: #0f1626;
+
+  --surface: #1d2d44;
+  --surface-alt: #182335;
+  --surface-hover: #243b58;
+
+  --border: rgba(62, 92, 118, 0.45);
+  --border-soft: rgba(62, 92, 118, 0.25);
+  --border-strong: #3e5c76;
+
+  --accent: #748cab;
+  --accent-hover: #8fa6c4;
+  --accent-soft: rgba(116, 140, 171, 0.18);
+
+  --text: #f0ebd8;
+  --text-soft: #a9bbd0;
+  --text-muted: #748cab;
+
+  --sidebar-bg: #1d2d44;
+  --sidebar-text: #f0ebd8;
+
+  --topbar-bg: rgba(13, 19, 33, 0.86);
+  --input-bg: #152136;
+
+  --cta-bg: #f0ebd8;
+  --cta-text: #0d1321;
+
+  --success: #7fb88e;
+  --warning: #d8a657;
+  --danger: #d97d7d;
+
+  --overlay: rgba(6, 9, 16, 0.6);
+
+  color-scheme: dark;
+}
+
+/* =========================
+   LIGHT THEME
+========================= */
+
+[data-theme="light"] {
+  --bg: #eae0d5;
+  --bg-alt: #f2ebe0;
+
+  --surface: #f6f0e6;
+  --surface-alt: #efe6d8;
+  --surface-hover: #e4d6c3;
+
+  --border: rgba(94, 80, 63, 0.18);
+  --border-soft: rgba(94, 80, 63, 0.1);
+  --border-strong: #c6ac8f;
+
+  --accent: #22333b;
+  --accent-hover: #0a0908;
+  --accent-soft: rgba(198, 172, 143, 0.28);
+
+  --text: #0a0908;
+  --text-soft: #5e503f;
+  --text-muted: #5e503f;
+
+  --sidebar-bg: #22333b;
+  --sidebar-text: #eae0d5;
+
+  --topbar-bg: rgba(234, 224, 213, 0.86);
+  --input-bg: #ffffff;
+
+  --cta-bg: #22333b;
+  --cta-text: #eae0d5;
+
+  --success: #3e7250;
+  --warning: #9c6b1f;
+  --danger: #a23e3e;
+
+  --overlay: rgba(20, 15, 10, 0.35);
+
+  color-scheme: light;
+}
