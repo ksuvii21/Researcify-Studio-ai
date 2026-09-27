@@ -15,6 +15,8 @@ import DiscoverPage from "../pages/DiscoverPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ProjectDetailPage from "../pages/ProjectDetailPage";
 import LibraryPage from "../pages/LibraryPage";
+import NotesPage from "../pages/NotesPage";
+import NoteEditorPage from "../pages/NoteEditorPage";
 
 import NotFoundPage from "../pages/NotFoundPage";
 
@@ -88,13 +90,14 @@ const AppRouter = () => {
             element={<LibraryPage />}
           />
 
-          {/* Phase 7D */}
-          {/*
           <Route
             path="/notes"
             element={<NotesPage />}
           />
-          */}
+          <Route
+            path="/notes/:id"
+            element={<NoteEditorPage />}
+          />
 
           {/* Phase 7E */}
           {/*
