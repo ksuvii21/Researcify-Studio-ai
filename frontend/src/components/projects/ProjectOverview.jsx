@@ -10,28 +10,70 @@ import {
 const ProjectOverview = ({
   project,
 }) => {
+  /*
+   * Only papers and documents are backed by real
+   * data right now (paperIds / documentIds).
+   *
+   * Notes, AI conversations, collections and
+   * activity are not integrated yet, so they show
+   * an em dash rather than an invented number.
+   *
+   * Papers  -> Phase 8B
+   * Notes    -> Phase 8C
+   * Activity -> Phase 8F
+   * AI       -> Phase 8G
+   */
+  const paperCount =
+    project.paperIds?.length || 0;
+
+  const documentCount =
+    project.documentIds?.length || 0;
+
   const stats = [
     {
       label: "Research Papers",
-      value: project.papers,
+      value: paperCount,
       icon: Files,
     },
     {
       label: "Research Notes",
-      value: project.notes,
+      value: "—",
       icon: NotebookPen,
     },
     {
       label: "Documents",
-      value: project.documents,
+      value: documentCount,
       icon: FileText,
     },
     {
       label: "AI Conversations",
-      value: project.aiChats,
+      value: "—",
       icon: Bot,
     },
   ];
+
+  const formatDate = (value) =>
+    value
+      ? new Date(value).toLocaleDateString(
+          undefined,
+          {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }
+        )
+      : "—";
+
+  const createdDate = formatDate(
+    project.createdAt
+  );
+
+  const updatedDate = formatDate(
+    project.updatedAt
+  );
+
+  const statusClass =
+    project.status?.toLowerCase() || "active";
 
   return (
     <div className="project-overview">
@@ -63,51 +105,25 @@ const ProjectOverview = ({
         <article className="project-panel">
           <div className="project-panel__heading">
             <div>
-              <h2>Research Progress</h2>
+              <h2>Research Question</h2>
               <p>
-                Overall project completion.
+                The focus of this project.
               </p>
             </div>
 
             <TrendingUp size={19} />
           </div>
 
-          <div className="project-large-progress">
-            <div>
-              <strong>
-                {project.progress}%
-              </strong>
-
-              <span>completed</span>
-            </div>
-
-            <div className="project-large-progress__track">
-              <span
-                style={{
-                  width:
-                    `${project.progress}%`,
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="project-progress-milestones">
-            <span className="completed">
-              Literature discovery
-            </span>
-
-            <span className="completed">
-              Initial review
-            </span>
-
-            <span className="active">
-              Research synthesis
-            </span>
-
-            <span>
-              Final analysis
-            </span>
-          </div>
+          {project.researchQuestion ? (
+            <p className="project-panel__question">
+              {project.researchQuestion}
+            </p>
+          ) : (
+            <p className="project-panel__question project-panel__question--empty">
+              No research question has been added
+              yet. Edit this project to add one.
+            </p>
+          )}
         </article>
 
         <article className="project-panel">
@@ -124,30 +140,28 @@ const ProjectOverview = ({
 
           <div className="project-detail-info">
             <div>
-              <span>Research area</span>
-              <strong>
-                {project.area}
-              </strong>
-            </div>
-
-            <div>
               <span>Created</span>
-              <strong>
-                {project.created}
-              </strong>
+              <strong>{createdDate}</strong>
             </div>
 
             <div>
               <span>Last updated</span>
-              <strong>
-                {project.updated}
-              </strong>
+              <strong>{updatedDate}</strong>
             </div>
 
             <div>
               <span>Status</span>
-              <strong>
+              <strong
+                className={`project-status ${statusClass}`}
+              >
                 {project.status}
+              </strong>
+            </div>
+
+            <div>
+              <span>Project ID</span>
+              <strong className="project-detail-info__id">
+                {project._id}
               </strong>
             </div>
           </div>

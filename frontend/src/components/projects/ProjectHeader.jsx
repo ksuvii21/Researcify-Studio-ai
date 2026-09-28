@@ -1,15 +1,9 @@
 import {
-  FolderKanban,
   Plus,
   Sparkles,
 } from "lucide-react";
 
-import useCreateAction from "../../hooks/useCreateAction";
-
-const ProjectHeader = () => {
-  const { handleAction } =
-    useCreateAction();
-
+const ProjectHeader = ({ onCreateProject }) => {
   return (
     <header className="projects-header">
       <div>
@@ -30,9 +24,7 @@ const ProjectHeader = () => {
       <button
         type="button"
         className="projects-primary-btn"
-        onClick={() =>
-          handleAction("project")
-        }
+        onClick={onCreateProject}
       >
         <Plus size={17} />
         New Project

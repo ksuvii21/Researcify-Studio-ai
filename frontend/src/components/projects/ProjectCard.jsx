@@ -1,25 +1,123 @@
 import {
   ArrowRight,
-  Bot,
+  Calendar,
   FileText,
   Files,
   MoreHorizontal,
-  NotebookPen,
+  Pencil,
+  Trash2,
 } from "lucide-react";
+
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { useNavigate } from "react-router-dom";
 
 const ProjectCard = ({
   project,
   view,
+  onEditProject,
+  onDeleteProject,
 }) => {
   const navigate = useNavigate();
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const menuRef = useRef(null);
+
   const openProject = () => {
     navigate(
-      `/projects/${project.id}`
+      `/projects/${project._id}`
     );
   };
+
+  // Close the menu on outside click / Escape.
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handlePointerDown
+    );
+
+    document.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handlePointerDown
+      );
+
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [menuOpen]);
+
+  const handleEdit = (event) => {
+    event.stopPropagation();
+
+    setMenuOpen(false);
+
+    onEditProject?.(project);
+  };
+
+  const handleDelete = (event) => {
+    event.stopPropagation();
+
+    setMenuOpen(false);
+
+    onDeleteProject?.(project);
+  };
+
+  const statusClass =
+    project.status?.toLowerCase() || "active";
+
+  const formattedDate = project.updatedAt
+    ? new Date(
+        project.updatedAt
+      ).toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "";
+
+  /*
+   * Temporary counts.
+   *
+   * The backend currently stores paperIds and
+   * documentIds as arrays on the project. Notes
+   * and AI conversations are not integrated yet,
+   * so they are not counted here.
+   */
+  const paperCount =
+    project.paperIds?.length || 0;
+
+  const documentCount =
+    project.documentIds?.length || 0;
 
   return (
     <article
@@ -30,89 +128,97 @@ const ProjectCard = ({
       }`}
     >
       <div className="project-card__top">
-        <div className="project-card__status">
+        <div
+          className={`project-card__status project-status ${statusClass}`}
+        >
           <span />
           {project.status}
         </div>
 
-        <button
-          type="button"
-          className="project-card__menu"
-          aria-label="Project options"
+        <div
+          className="project-card__menu-wrap"
+          ref={menuRef}
         >
-          <MoreHorizontal size={18} />
-        </button>
+          <button
+            type="button"
+            className="project-card__menu"
+            aria-label="Project options"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={(event) => {
+              event.stopPropagation();
+              setMenuOpen((open) => !open);
+            }}
+          >
+            <MoreHorizontal size={18} />
+          </button>
+
+          {menuOpen && (
+            <div
+              className="project-card__menu-list"
+              role="menu"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleEdit}
+              >
+                <Pencil size={14} />
+                Edit project
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                className="danger"
+                onClick={handleDelete}
+              >
+                <Trash2 size={14} />
+                Delete project
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="project-card__body">
         <p className="project-card__area">
-          {project.area}
+          {project.status}
         </p>
 
         <h2>{project.title}</h2>
 
         <p className="project-card__description">
-          {project.description}
+          {project.description ||
+            "No description added yet."}
         </p>
-
-        <div className="project-card__tags">
-          {project.tags.map((tag) => (
-            <span key={tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="project-progress">
-        <div className="project-progress__labels">
-          <span>Research progress</span>
-
-          <strong>
-            {project.progress}%
-          </strong>
-        </div>
-
-        <div className="project-progress__track">
-          <span
-            style={{
-              width: `${project.progress}%`,
-            }}
-          />
-        </div>
       </div>
 
       <div className="project-card__stats">
         <span>
           <Files size={15} />
-          <strong>{project.papers}</strong>
+          <strong>{paperCount}</strong>
           Papers
         </span>
 
         <span>
-          <NotebookPen size={15} />
-          <strong>{project.notes}</strong>
-          Notes
-        </span>
-
-        <span>
           <FileText size={15} />
-          <strong>
-            {project.documents}
-          </strong>
-          Files
+          <strong>{documentCount}</strong>
+          Documents
         </span>
 
         <span>
-          <Bot size={15} />
-          <strong>{project.aiChats}</strong>
-          AI Chats
+          <Calendar size={15} />
+          <strong>{formattedDate}</strong>
+          Updated
         </span>
       </div>
 
       <footer className="project-card__footer">
         <span>
-          Updated {project.updated}
+          {project.researchQuestion
+            ? "Research question set"
+            : "No research question yet"}
         </span>
 
         <button

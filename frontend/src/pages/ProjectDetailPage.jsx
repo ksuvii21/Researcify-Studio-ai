@@ -9,12 +9,10 @@ import {
 } from "lucide-react";
 
 import {
-  useMemo,
   useState,
 } from "react";
 
 import {
-  Navigate,
   useParams,
 } from "react-router-dom";
 
@@ -27,7 +25,7 @@ import ProjectQuestions from "../components/projects/ProjectQuestions";
 import ProjectAI from "../components/projects/ProjectAI";
 import ProjectActivity from "../components/projects/ProjectActivity";
 
-import { projects } from "../data/projectMockData";
+import useProject from "../hooks/useProject";
 
 import "../components/projects/projects.css";
 
@@ -75,20 +73,42 @@ const ProjectDetailPage = () => {
   const [activeTab, setActiveTab] =
     useState("overview");
 
-  const project = useMemo(
-    () =>
-      projects.find(
-        (item) => item.id === id
-      ),
-    [id]
-  );
+  const {
+    project,
+    loading,
+    error,
+    refetch,
+  } = useProject(id);
 
-  if (!project) {
+  if (loading) {
     return (
-      <Navigate
-        to="/projects"
-        replace
-      />
+      <div className="project-detail-page">
+        <div className="project-detail-state">
+          <p>Loading project...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <div className="project-detail-page">
+        <div className="project-detail-state project-detail-state--error">
+          <h2>Project unavailable</h2>
+
+          <p>
+            {error ||
+              "This project could not be found."}
+          </p>
+
+          <button
+            type="button"
+            onClick={refetch}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
     );
   }
 

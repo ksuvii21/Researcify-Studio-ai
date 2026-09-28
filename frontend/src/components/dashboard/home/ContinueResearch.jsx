@@ -1,11 +1,35 @@
 import {
   ArrowRight,
-  BookOpenText,
   Clock3,
   Sparkles,
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
+import useDashboardProjects from "../../../hooks/useDashboardProjects";
+
 const ContinueResearch = () => {
+  const navigate = useNavigate();
+
+  const {
+    recentProjects,
+    loading,
+  } = useDashboardProjects();
+
+  const project = recentProjects[0];
+
+  const formatDate = (value) =>
+    value
+      ? new Date(value).toLocaleDateString(
+          undefined,
+          {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }
+        )
+      : "—";
+
   return (
     <section className="dashboard-card continue-research">
       <div className="dashboard-card__header">
@@ -19,46 +43,42 @@ const ContinueResearch = () => {
         </div>
       </div>
 
-      <div className="continue-research__project">
-        <span>Active Project</span>
-
-        <h3>Artificial Intelligence in Education</h3>
-
-        <div className="continue-research__progress">
-          <div>
-            <span>Project progress</span>
-            <strong>72%</strong>
-          </div>
-
-          <div className="continue-research__bar">
-            <span />
-          </div>
+      {loading ? (
+        <div className="continue-research__project">
+          <span>Active Project</span>
+          <h3>Loading...</h3>
         </div>
-      </div>
+      ) : project ? (
+        <div className="continue-research__project">
+          <span>{project.status} Project</span>
 
-      <div className="continue-research__paper">
-        <div className="continue-research__paper-icon">
-          <BookOpenText size={18} />
-        </div>
+          <h3>{project.title}</h3>
 
-        <div>
-          <span>Last opened paper</span>
-
-          <strong>
-            Generative AI and Personalized Learning
-            Environments
-          </strong>
-
-          <small>
+          <small className="continue-research__updated">
             <Clock3 size={12} />
-            Last opened 38 minutes ago
+            Last updated {formatDate(project.updatedAt)}
           </small>
         </div>
-      </div>
+      ) : (
+        <div className="continue-research__project">
+          <span>Active Project</span>
+
+          <h3>No projects yet</h3>
+
+          <small className="continue-research__updated">
+            Create a project to start your research.
+          </small>
+        </div>
+      )}
 
       <button
         type="button"
         className="continue-research__button"
+        disabled={!project}
+        onClick={() =>
+          project &&
+          navigate(`/projects/${project._id}`)
+        }
       >
         Continue Research
         <ArrowRight size={15} />

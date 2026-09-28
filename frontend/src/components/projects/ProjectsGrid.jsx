@@ -7,6 +7,8 @@ import ProjectCard from "./ProjectCard";
 const ProjectsGrid = ({
   projects,
   view,
+  onEditProject,
+  onDeleteProject,
 }) => {
   if (!projects.length) {
     return (
@@ -33,9 +35,11 @@ const ProjectsGrid = ({
     >
       {projects.map((project) => (
         <ProjectCard
-          key={project.id}
+          key={project._id}
           project={project}
           view={view}
+          onEditProject={onEditProject}
+          onDeleteProject={onDeleteProject}
         />
       ))}
     </section>

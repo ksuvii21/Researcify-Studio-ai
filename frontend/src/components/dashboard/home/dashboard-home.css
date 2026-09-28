@@ -450,6 +450,78 @@
   margin-top: 17px;
 }
 
+/*
+ * Loading / empty / error state for the dashboard
+ * projects card. Nothing was rendered here before
+ * because the list was a hard-coded mock.
+ */
+.dashboard-projects__state {
+  margin-top: 17px;
+  padding: 34px 16px;
+
+  border: 1px dashed var(--border);
+  border-radius: 11px;
+
+  color: var(--text-muted);
+
+  text-align: center;
+}
+
+.dashboard-projects__state h3 {
+  color: var(--text-soft);
+
+  font-size: 15px;
+}
+
+.dashboard-projects__state p {
+  margin-top: 5px;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.dashboard-projects__state button {
+  min-height: 34px;
+
+  margin-top: 13px;
+  padding: 0 12px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.dashboard-projects__state button {
+  color: #eae0d5;
+}
+
+.continue-research__updated {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+}
+
+.continue-research__button:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
 .project-card {
   min-width: 0;
 

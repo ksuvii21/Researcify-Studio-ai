@@ -28,16 +28,26 @@ const ProjectDetailHeader = ({
       <div className="project-detail-header__main">
         <div>
           <div className="project-detail-header__meta">
-            <span>
+            <span
+              className={`project-status ${
+                project.status?.toLowerCase() ||
+                "active"
+              }`}
+            >
               {project.status}
             </span>
 
-            <span>{project.area}</span>
+            <span className="project-detail-header__id">
+              {project._id}
+            </span>
           </div>
 
           <h1>{project.title}</h1>
 
-          <p>{project.description}</p>
+          <p>
+            {project.description ||
+              "No description added yet."}
+          </p>
         </div>
 
         <div className="project-detail-header__actions">

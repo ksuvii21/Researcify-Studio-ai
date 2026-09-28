@@ -1,74 +1,169 @@
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useState } from "react";
 
 import ProjectHeader from "../components/projects/ProjectHeader";
 import ProjectToolbar from "../components/projects/ProjectToolbar";
 import ProjectsGrid from "../components/projects/ProjectsGrid";
+import ProjectFormModal from "../components/projects/ProjectFormModal";
 
-import { projects } from "../data/projectMockData";
-
-import "../components/projects/projects.css";
+import useProjects from "../hooks/useProjects";
+import useToast from "../hooks/useToast";
 
 const ProjectsPage = () => {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] =
-    useState("all");
+  const toast = useToast();
 
-  const [view, setView] =
-    useState("grid");
+  const [search, setSearch] = useState("");
 
-  const filteredProjects =
-    useMemo(() => {
-      return projects.filter(
-        (project) => {
-          const matchesSearch =
-            [
-              project.title,
-              project.description,
-              project.area,
-              ...project.tags,
-            ]
-              .join(" ")
-              .toLowerCase()
-              .includes(
-                query
-                  .trim()
-                  .toLowerCase()
-              );
+  const [status, setStatus] = useState("");
 
-          const matchesStatus =
-            status === "all" ||
-            project.status === status;
+  const [formOpen, setFormOpen] = useState(false);
 
-          return (
-            matchesSearch &&
-            matchesStatus
-          );
-        }
+  const [editingProject, setEditingProject] =
+    useState(null);
+
+  const {
+    projects,
+    loading,
+    error,
+    mutationLoading,
+    fetchProjects,
+    createProject,
+    updateProject,
+    deleteProject,
+  } = useProjects({ search, status });
+
+  // ---------------------------------------------------
+  // Create / Edit
+  // ---------------------------------------------------
+
+  const handleCreate = () => {
+    setEditingProject(null);
+    setFormOpen(true);
+  };
+
+  const handleEdit = (project) => {
+    setEditingProject(project);
+    setFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setFormOpen(false);
+    setEditingProject(null);
+  };
+
+  const handleProjectSubmit = async (values) => {
+    if (editingProject?._id) {
+      const updated = await updateProject(
+        editingProject._id,
+        values
       );
-    }, [query, status]);
+
+      toast.success(
+        "Project updated",
+        `"${updated?.title || values.title}" was saved.`
+      );
+    } else {
+      const created = await createProject(values);
+
+      toast.success(
+        "Project created",
+        `"${created?.title || values.title}" is ready for research.`
+      );
+    }
+
+    handleCloseForm();
+  };
+
+  // ---------------------------------------------------
+  // Delete
+  // ---------------------------------------------------
+
+  const handleDelete = async (project) => {
+    const confirmed = window.confirm(
+      `Delete "${project.title}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteProject(project._id);
+
+      toast.success(
+        "Project deleted",
+        `"${project.title}" was removed.`
+      );
+    } catch (err) {
+      console.error(
+        "[Projects] Delete error:",
+        err
+      );
+
+      toast.error(
+        "Delete failed",
+        err?.message ||
+          "Unable to delete this project."
+      );
+    }
+  };
 
   return (
     <div className="projects-page">
-      <ProjectHeader />
+      <ProjectHeader onCreateProject={handleCreate} />
 
       <ProjectToolbar
-        query={query}
-        setQuery={setQuery}
-        status={status}
-        setStatus={setStatus}
-        view={view}
-        setView={setView}
-        resultCount={
-          filteredProjects.length
+        query={search}
+        setQuery={setSearch}
+        status={status === "" ? "all" : status}
+        setStatus={(value) =>
+          setStatus(value === "all" ? "" : value)
         }
       />
 
-      <ProjectsGrid
-        projects={filteredProjects}
-        view={view}
+      {loading ? (
+        <div className="projects-state">
+          <p>Loading your research projects...</p>
+        </div>
+      ) : error ? (
+        <div className="projects-state projects-error">
+          <p>{error}</p>
+
+          <button
+            type="button"
+            onClick={fetchProjects}
+          >
+            Try Again
+          </button>
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="projects-state">
+          <h3>No projects found</h3>
+
+          <p>
+            Create a research project to organize
+            your papers, notes, documents and AI
+            research.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleCreate}
+          >
+            New Project
+          </button>
+        </div>
+      ) : (
+        <ProjectsGrid
+          projects={projects}
+          onEditProject={handleEdit}
+          onDeleteProject={handleDelete}
+        />
+      )}
+
+      <ProjectFormModal
+        open={formOpen}
+        project={editingProject}
+        loading={mutationLoading}
+        onClose={handleCloseForm}
+        onSubmit={handleProjectSubmit}
       />
     </div>
   );

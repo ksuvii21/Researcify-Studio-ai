@@ -284,6 +284,156 @@
   background: var(--accent);
 }
 
+/* ===============================
+   STATUS PILLS
+=============================== */
+
+/* DETAIL STATES */
+
+.project-detail-state {
+  margin-top: 20px;
+  padding: 70px 20px;
+
+  border: 1px dashed var(--border);
+  border-radius: 13px;
+
+  color: var(--text-muted);
+
+  text-align: center;
+}
+
+.project-detail-state h2 {
+  color: var(--text-soft);
+
+  font-size: 18px;
+}
+
+.project-detail-state p {
+  margin-top: 6px;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.project-detail-state--error p {
+  color: var(--danger);
+}
+
+.project-detail-state button {
+  min-height: 38px;
+
+  margin-top: 15px;
+  padding: 0 14px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.project-detail-state button {
+  color: #eae0d5;
+}
+
+/* OVERVIEW EXTRAS */
+
+.project-panel__question {
+  margin-top: 16px;
+
+  color: var(--text-soft);
+
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.project-panel__question--empty {
+  color: var(--text-muted);
+
+  font-size: 13px;
+}
+
+.project-detail-header__id {
+  max-width: 220px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  font-family: monospace;
+}
+
+.project-detail-info__id {
+  max-width: 210px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  font-family: monospace;
+  font-size: 11px;
+}
+
+/*
+ * Backend status values are Active, Completed
+ * and Archived. The lowercase modifier class is
+ * derived from project.status on the client.
+ */
+
+.project-status {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 5px 9px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: var(--surface-alt);
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+  font-weight: 650;
+
+  letter-spacing: 0.02em;
+}
+
+.project-status > span {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.project-status.active {
+  color: var(--accent);
+}
+
+.project-status.completed {
+  color: var(--success);
+}
+
+.project-status.archived {
+  color: var(--text-muted);
+}
+
+.project-card__menu-wrap {
+  position: relative;
+}
+
 .project-card__menu {
   width: 31px;
   height: 31px;
@@ -298,6 +448,64 @@
   background: transparent;
 
   color: var(--text-muted);
+}
+
+.project-card__menu-list {
+  position: absolute;
+
+  top: calc(100% + 6px);
+  right: 0;
+
+  z-index: 20;
+
+  min-width: 168px;
+
+  display: grid;
+
+  padding: 5px;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: var(--surface);
+
+  box-shadow: var(--shadow-md);
+}
+
+.project-card__menu-list button {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 9px 10px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: var(--text-soft);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  text-align: left;
+}
+
+.project-card__menu-list button:hover {
+  background: var(--surface-hover);
+
+  color: var(--text);
+}
+
+.project-card__menu-list button.danger {
+  color: var(--danger);
+}
+
+.project-card__menu-list button.danger:hover {
+  background: var(--surface-hover);
 }
 
 .project-card__menu:hover {
@@ -1361,6 +1569,62 @@
 }
 
 /* EMPTY */
+
+.projects-state {
+  margin-top: 20px;
+  padding: 70px 20px;
+
+  border: 1px dashed var(--border);
+  border-radius: 13px;
+
+  color: var(--text-muted);
+
+  text-align: center;
+}
+
+.projects-state h3 {
+  color: var(--text-soft);
+
+  font-size: 17px;
+}
+
+.projects-state p {
+  margin-top: 6px;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.projects-error {
+  border-color: var(--border-strong);
+}
+
+.projects-error p {
+  color: var(--danger);
+}
+
+.projects-error button {
+  min-height: 38px;
+
+  margin-top: 15px;
+  padding: 0 14px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.projects-error button {
+  color: #eae0d5;
+}
 
 .projects-empty {
   margin-top: 20px;
