@@ -5,17 +5,19 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
-import {
-  uploadProjects,
-} from "../../data/uploadsMockData";
-
+/*
+ * Status options are the model's real enum values.
+ * Project options come from the user's actual
+ * projects, not a hard-coded list.
+ */
 const UploadToolbar = ({
   query,
   setQuery,
   status,
   setStatus,
-  project,
-  setProject,
+  projectId,
+  setProjectId,
+  projects,
   sort,
   setSort,
   view,
@@ -53,43 +55,35 @@ const UploadToolbar = ({
             setStatus(event.target.value)
           }
         >
-          <option value="all">
-            All Status
-          </option>
+          <option value="">All Status</option>
 
-          <option value="ready">
-            Ready
-          </option>
+          <option value="Uploaded">Uploaded</option>
 
-          <option value="processing">
-            Processing
-          </option>
+          <option value="Extracting">Extracting</option>
 
-          <option value="failed">
-            Failed
-          </option>
+          <option value="Chunking">Chunking</option>
+
+          <option value="Ready">Ready</option>
+
+          <option value="Failed">Failed</option>
         </select>
 
         <select
-          value={project}
+          value={projectId}
           onChange={(event) =>
-            setProject(event.target.value)
+            setProjectId(event.target.value)
           }
         >
-          <option value="all">
-            All Projects
-          </option>
+          <option value="">All Projects</option>
 
-          {uploadProjects.map(
-            (item) => (
-              <option
-                key={item}
-                value={item}
-              >
-                {item}
-              </option>
-            )
-          )}
+          {projects.map((project) => (
+            <option
+              key={project._id}
+              value={project._id}
+            >
+              {project.title}
+            </option>
+          ))}
         </select>
 
         <select
@@ -98,15 +92,13 @@ const UploadToolbar = ({
             setSort(event.target.value)
           }
         >
-          <option value="recent">
+          <option value="updatedAt">
             Recently Uploaded
           </option>
 
-          <option value="name">
-            Name A–Z
-          </option>
+          <option value="title">Name A–Z</option>
 
-          <option value="size">
+          <option value="fileSize">
             Largest Files
           </option>
         </select>

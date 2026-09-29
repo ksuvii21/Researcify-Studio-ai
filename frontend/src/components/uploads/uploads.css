@@ -379,7 +379,28 @@
   font-weight: 650;
 }
 
-.document-status--ready {
+/*
+ * Status colours mirror the RAG lifecycle:
+ *   Uploaded / Extracting / Chunking -> in progress
+ *   Ready                           -> done
+ *   Failed                          -> needs attention
+ *
+ * The legacy --pending/--processing/--completed names are
+ * kept so any document record still carrying an old value
+ * (before the 8D.7 migration ran) renders correctly.
+ */
+.document-status--uploaded,
+.document-status--pending,
+.document-status--extracting,
+.document-status--chunking,
+.document-status--processing {
+  background: var(--accent-soft);
+
+  color: var(--accent);
+}
+
+.document-status--ready,
+.document-status--completed {
   background:
     color-mix(
       in srgb,
@@ -388,12 +409,6 @@
     );
 
   color: var(--success);
-}
-
-.document-status--processing {
-  background: var(--accent-soft);
-
-  color: var(--accent);
 }
 
 .document-status--failed {
@@ -429,8 +444,21 @@
   color: var(--text);
 }
 
+/*
+ * The card body opens the details modal, so it reads as
+ * clickable and is keyboard-reachable (role/tabIndex are
+ * set on the element itself).
+ */
 .document-card__content {
   margin-top: 15px;
+
+  cursor: pointer;
+}
+
+.document-card__content:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 .document-card__type {
@@ -507,62 +535,12 @@
 
 /* PROCESSING */
 
-.document-processing {
-  margin-top: 15px;
-  padding: 12px;
-
-  border: 1px solid var(--border);
-  border-radius: 8px;
-
-  background: var(--surface-alt);
-}
-
-.document-processing__heading {
-  display: flex;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  color: var(--text-soft);
-
-  font-size: 12px;
-}
-
-.document-processing__heading strong {
-  color: var(--accent);
-}
-
-.document-processing__track {
-  height: 6px;
-
-  margin-top: 9px;
-
-  overflow: hidden;
-
-  border-radius: 999px;
-
-  background: var(--border);
-}
-
-.document-processing__track span {
-  display: block;
-
-  height: 100%;
-
-  border-radius: inherit;
-
-  background: var(--accent);
-
-  transition: width 0.3s ease;
-}
-
-.document-processing p {
-  margin-top: 7px;
-
-  color: var(--text-muted);
-
-  font-size: 11px;
-}
+/*
+ * .document-processing was removed in 8D.7. Nothing renders
+ * a processing percentage any more: documents sit at
+ * "Uploaded" until real extraction exists in 8G, and a
+ * progress bar would imply work that is not happening.
+ */
 
 /* FAILED */
 
@@ -612,31 +590,14 @@
   font-size: 11px;
 }
 
+/*
+ * .document-processing and .document-card__research-meta
+ * were removed with the mock-era card: nothing renders a
+ * fabricated processing percentage or chunk/tag counts
+ * now that documents start at "Uploaded".
+ */
+
 /* RESEARCH META */
-
-.document-card__research-meta {
-  display: flex;
-  align-items: center;
-
-  gap: 14px;
-
-  margin-top: 13px;
-
-  color: var(--text-muted);
-
-  font-size: 11px;
-}
-
-.document-card__research-meta span {
-  display: flex;
-  align-items: center;
-
-  gap: 5px;
-}
-
-.document-card__research-meta svg {
-  color: var(--accent);
-}
 
 .document-card__tags {
   display: flex;
@@ -762,6 +723,208 @@
   font-size: 13px;
 }
 
+.uploads-empty button {
+  min-height: 36px;
+
+  margin-top: 15px;
+  padding: 0 13px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.uploads-empty button {
+  color: #eae0d5;
+}
+
+/* LOADING / ERROR */
+
+.uploads-state {
+  margin-top: 15px;
+  padding: 75px 20px;
+
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+
+  color: var(--text-muted);
+
+  text-align: center;
+}
+
+.uploads-state p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.uploads-state--error p {
+  color: var(--danger);
+}
+
+.uploads-state button {
+  min-height: 36px;
+
+  margin-top: 15px;
+  padding: 0 13px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.uploads-state button {
+  color: #eae0d5;
+}
+
+/* UPLOAD PROGRESS */
+
+.upload-progress {
+  margin-top: 4px;
+}
+
+.upload-progress__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 7px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+}
+
+.upload-progress__heading strong {
+  color: var(--accent);
+
+  font-size: 12px;
+}
+
+.upload-progress__track {
+  height: 7px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: var(--surface-hover);
+}
+
+.upload-progress__track span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: var(--accent);
+
+  transition: width 0.15s linear;
+}
+
+/* CARD EXTRAS */
+
+.document-card__filename {
+  margin-top: 5px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+
+  word-break: break-all;
+}
+
+.document-card__project--none {
+  color: var(--text-muted);
+}
+
+.document-card__menu-list {
+  position: absolute;
+
+  top: calc(100% + 6px);
+  right: 0;
+
+  z-index: 20;
+
+  min-width: 178px;
+
+  display: grid;
+
+  padding: 5px;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: var(--surface);
+
+  box-shadow: var(--shadow-md);
+}
+
+.document-card__menu-list button {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 9px 10px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: var(--text-soft);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  text-align: left;
+}
+
+.document-card__menu-list button:hover {
+  background: var(--surface-hover);
+
+  color: var(--text);
+}
+
+.document-card__menu-list button.danger {
+  color: var(--danger);
+}
+
+.document-status--uploaded,
+.document-status--pending,
+.document-status--extracting,
+.document-status--chunking,
+.document-status--processing {
+  color: var(--accent);
+}
+
+.document-status--ready,
+.document-status--completed {
+  color: var(--success);
+}
+
+.document-status--failed {
+  color: var(--danger);
+}
+
 /* PREVIEW */
 
 .document-preview__hero {
@@ -859,39 +1022,7 @@
   font-size: 11px;
 }
 
-/* TABS */
-
-.document-preview__tabs {
-  display: flex;
-
-  gap: 5px;
-
-  margin-top: 19px;
-
-  border-bottom: 1px solid var(--border);
-}
-
-.document-preview__tabs button {
-  min-height: 39px;
-
-  padding: 0 11px;
-
-  border: 0;
-  border-bottom: 2px solid transparent;
-
-  background: transparent;
-
-  color: var(--text-muted);
-
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.document-preview__tabs button.active {
-  border-bottom-color: var(--accent);
-
-  color: var(--accent);
-}
+/* OVERVIEW */
 
 .document-preview__overview section {
   margin-top: 18px;
@@ -909,53 +1040,6 @@
 
   letter-spacing: 0.05em;
   text-transform: uppercase;
-}
-
-.document-preview__summary {
-  display: flex;
-  align-items: flex-start;
-
-  gap: 9px;
-
-  padding: 13px;
-
-  border: 1px solid var(--border);
-  border-radius: 8px;
-
-  background: var(--accent-soft);
-}
-
-.document-preview__summary svg {
-  flex-shrink: 0;
-
-  color: var(--accent);
-}
-
-.document-preview__summary p {
-  color: var(--text-soft);
-
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.document-preview__tags {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: 6px;
-}
-
-.document-preview__tags span {
-  padding: 6px 8px;
-
-  border: 1px solid var(--border);
-  border-radius: 999px;
-
-  background: var(--surface-alt);
-
-  color: var(--text-muted);
-
-  font-size: 11px;
 }
 
 .document-preview__information {
@@ -995,66 +1079,7 @@
   font-size: 12px;
 }
 
-/* CONTENT */
-
-.document-preview__content {
-  margin-top: 18px;
-}
-
-.document-preview__content-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-
-  gap: 15px;
-}
-
-.document-preview__content-header p {
-  color: var(--text-muted);
-
-  font-size: 11px;
-}
-
-.document-preview__content-header button {
-  min-height: 33px;
-
-  display: flex;
-  align-items: center;
-
-  gap: 5px;
-
-  padding: 0 9px;
-
-  border: 1px solid var(--border);
-  border-radius: 7px;
-
-  background: var(--surface-alt);
-
-  color: var(--text-muted);
-
-  font-size: 11px;
-}
-
-.document-preview__text {
-  max-height: 330px;
-
-  margin-top: 11px;
-  padding: 15px;
-
-  overflow-y: auto;
-
-  border: 1px solid var(--border);
-  border-radius: 8px;
-
-  background: var(--surface-alt);
-
-  color: var(--text-soft);
-
-  font-size: 13px;
-  line-height: 1.8;
-
-  white-space: pre-wrap;
-}
+/* ACTIONS */
 
 .document-preview__actions {
   display: flex;
@@ -1090,17 +1115,69 @@
   font-weight: 650;
 }
 
-.document-preview__actions
-.document-preview__ai {
-  background: var(--accent);
+.document-preview__actions button:hover:not(:disabled) {
+  color: var(--text);
 
-  color: #0d1321;
+  border-color: var(--border-strong, var(--border));
 }
 
-[data-theme="light"]
+.document-preview__actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/*
+ * Destructive action stays visually distinct from Edit
+ * and Download so it is not clicked by accident.
+ */
 .document-preview__actions
-.document-preview__ai {
-  color: #eae0d5;
+.document-preview__delete {
+  color: var(--danger, #e5484d);
+}
+
+.document-preview__actions
+.document-preview__delete:hover:not(:disabled) {
+  color: var(--danger, #e5484d);
+
+  border-color: var(--danger, #e5484d);
+}
+
+/*
+ * Honest statement of processing state: the document is
+ * stored, but not yet searchable.
+ */
+.document-preview__note {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 7px;
+
+  margin-top: 14px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.document-preview__note svg {
+  flex-shrink: 0;
+
+  margin-top: 1px;
+}
+
+.document-preview__status {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 10px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+  text-transform: capitalize;
 }
 
 /* RESPONSIVE */

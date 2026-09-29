@@ -2,12 +2,29 @@ import {
   ArrowRight,
   Bookmark,
   FileText,
-  Folder,
   Star,
   Upload,
 } from "lucide-react";
 import { useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
+import useDashboardPapers from "../../../hooks/useDashboardPapers";
+import useDashboardDocuments from "../../../hooks/useDashboardDocuments";
+
+import {
+  formatDocumentDate,
+  formatFileSize,
+  formatFileType,
+} from "../../../utils/fileFormat";
+
+/*
+ * Tabs are labels only for now:
+ *  - Favorites / Recent map to real papers
+ *  - Uploaded maps to real documents
+ *  - Collections belongs to Phase 8E and has no model
+ *    yet, so it is not rendered rather than faked.
+ */
 const tabs = [
   {
     id: "recent",
@@ -24,49 +41,70 @@ const tabs = [
     label: "Uploaded",
     icon: Upload,
   },
-  {
-    id: "collections",
-    label: "Collections",
-    icon: Folder,
-  },
-];
-
-const libraryItems = [
-  {
-    title:
-      "Generative AI and Personalized Learning Environments",
-    meta: "R. Sharma · 2026",
-    category: "Artificial Intelligence",
-  },
-  {
-    title:
-      "Human-AI Collaboration: Emerging Research Directions",
-    meta: "S. Patel · 2026",
-    category: "Human-Computer Interaction",
-  },
-  {
-    title:
-      "Explainable AI in Adaptive Learning Systems",
-    meta: "L. Chen · 2025",
-    category: "Machine Learning",
-  },
 ];
 
 const LibraryPreview = () => {
-  const [activeTab, setActiveTab] =
-    useState("recent");
+  const [activeTab, setActiveTab] = useState("recent");
+
+  const navigate = useNavigate();
+
+  const { recentPapers, loading: papersLoading } =
+    useDashboardPapers();
+
+  const { recentDocuments, loading: documentsLoading } =
+    useDashboardDocuments();
+
+  const loading = papersLoading || documentsLoading;
+
+  /*
+   * Real library entries only. Papers and documents are
+   * distinct models, so they are normalised into one row
+   * shape for display rather than merged in the data
+   * layer.
+   */
+  const items =
+    activeTab === "uploaded"
+      ? recentDocuments.map((document) => ({
+          id: document._id,
+          title: document.title,
+          meta: `${formatFileType(
+            document.mimeType
+          )} · ${formatFileSize(document.fileSize)}`,
+          category:
+            document.projectId?.title || "Not assigned",
+          href: "/uploads",
+        }))
+      : recentPapers.map((paper) => ({
+          id: paper._id,
+          title: paper.title,
+          meta: [
+            paper.authors?.[0],
+            paper.year,
+          ]
+            .filter(Boolean)
+            .join(" · "),
+          category:
+            paper.source ||
+            formatDocumentDate(paper.createdAt),
+          href: "/library",
+        }));
+
+  const emptyTab =
+    activeTab === "favorites" ? "favorites" : activeTab;
 
   return (
     <section className="dashboard-card library-preview">
       <div className="dashboard-card__header">
         <div>
           <h2>My Library</h2>
-          <p>
-            Your organized research knowledge.
-          </p>
+          <p>Your organized research knowledge.</p>
         </div>
 
-        <button type="button" className="text-button">
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => navigate("/library")}
+        >
           Open Library
           <ArrowRight size={14} />
         </button>
@@ -77,9 +115,7 @@ const LibraryPreview = () => {
           <button
             type="button"
             key={id}
-            className={
-              activeTab === id ? "active" : ""
-            }
+            className={activeTab === id ? "active" : ""}
             onClick={() => setActiveTab(id)}
           >
             <Icon size={13} />
@@ -88,34 +124,49 @@ const LibraryPreview = () => {
         ))}
       </div>
 
-      <div className="library-preview__list">
-        {libraryItems.map((item) => (
-          <article
-            className="library-preview__item"
-            key={item.title}
-          >
-            <div className="library-preview__document">
-              <FileText size={17} />
-            </div>
-
-            <div className="library-preview__info">
-              <strong>{item.title}</strong>
-              <span>{item.meta}</span>
-            </div>
-
-            <span className="library-preview__category">
-              {item.category}
-            </span>
-
-            <button
-              type="button"
-              aria-label="Save paper"
+      {loading ? (
+        <div className="library-preview__state">
+          <p>Loading your library...</p>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="library-preview__state">
+          <p>
+            {emptyTab === "uploaded"
+              ? "You have not uploaded any documents yet."
+              : "Nothing in your library yet."}
+          </p>
+        </div>
+      ) : (
+        <div className="library-preview__list">
+          {items.map((item) => (
+            <article
+              className="library-preview__item"
+              key={item.id}
             >
-              <Bookmark size={14} />
-            </button>
-          </article>
-        ))}
-      </div>
+              <div className="library-preview__document">
+                <FileText size={17} />
+              </div>
+
+              <div className="library-preview__info">
+                <strong>{item.title}</strong>
+                <span>{item.meta}</span>
+              </div>
+
+              <span className="library-preview__category">
+                {item.category}
+              </span>
+
+              <button
+                type="button"
+                aria-label={`Open ${item.title}`}
+                onClick={() => navigate(item.href)}
+              >
+                <Bookmark size={14} />
+              </button>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 };

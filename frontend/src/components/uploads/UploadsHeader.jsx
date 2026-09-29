@@ -1,15 +1,10 @@
 import {
-  FileText,
   Plus,
   Sparkles,
   Upload,
 } from "lucide-react";
 
-import useCreateAction from "../../hooks/useCreateAction";
-
-const UploadsHeader = () => {
-  const { handleAction } = useCreateAction();
-
+const UploadsHeader = ({ onUploadDocument }) => {
   return (
     <header className="uploads-header">
       <div>
@@ -31,9 +26,7 @@ const UploadsHeader = () => {
       <div className="uploads-header__actions">
         <button
           type="button"
-          onClick={() =>
-            handleAction("upload")
-          }
+          onClick={onUploadDocument}
         >
           <Upload size={17} />
           Upload Document
@@ -42,9 +35,7 @@ const UploadsHeader = () => {
         <button
           type="button"
           className="uploads-header__primary"
-          onClick={() =>
-            handleAction("upload")
-          }
+          onClick={onUploadDocument}
         >
           <Plus size={17} />
           Add Files

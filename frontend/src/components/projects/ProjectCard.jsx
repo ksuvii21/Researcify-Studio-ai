@@ -108,16 +108,28 @@ const ProjectCard = ({
   /*
    * Temporary counts.
    *
-   * The backend currently stores paperIds and
-   * documentIds as arrays on the project. Notes
-   * and AI conversations are not integrated yet,
-   * so they are not counted here.
+   * The backend stores paperIds as an array on the
+   * project, so it is still the source of truth for
+   * papers. Notes and AI conversations are not counted
+   * here yet.
    */
   const paperCount =
     project.paperIds?.length || 0;
 
+  /*
+   * Documents are NOT counted from project.documentIds.
+   * That array is no longer written to: the canonical
+   * relationship is UploadedDocument.projectId, so
+   * reading the array here would always report 0.
+   *
+   * GET /projects returns documentCount, computed by the
+   * backend. The array is kept only as a fallback for
+   * older responses that predate that field.
+   */
   const documentCount =
-    project.documentIds?.length || 0;
+    typeof project.documentCount === "number"
+      ? project.documentCount
+      : project.documentIds?.length || 0;
 
   return (
     <article

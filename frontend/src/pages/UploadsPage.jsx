@@ -1,193 +1,265 @@
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useState } from "react";
 
 import UploadsHeader from "../components/uploads/UploadsHeader";
 import UploadStats from "../components/uploads/UploadStats";
 import UploadToolbar from "../components/uploads/UploadToolbar";
 import DocumentsView from "../components/uploads/DocumentsView";
+import DocumentUploadModal from "../components/uploads/DocumentUploadModal";
+import DocumentEditModal from "../components/uploads/DocumentEditModal";
 import DocumentPreviewModal from "../components/uploads/DocumentPreviewModal";
 
-import {
-  initialUploadedDocuments,
-} from "../data/uploadsMockData";
+import { saveDocumentDownload, downloadDocument } from "../api/documentApi";
+
+import useDocuments from "../hooks/useDocuments";
+import useProjects from "../hooks/useProjects";
+import useToast from "../hooks/useToast";
 
 import "../components/uploads/uploads.css";
 
 const UploadsPage = () => {
-  const [
+  const toast = useToast();
+
+  const [query, setQuery] = useState("");
+
+  const [status, setStatus] = useState("");
+
+  const [projectId, setProjectId] = useState("");
+
+  const [sort, setSort] = useState("updatedAt");
+
+  const [view, setView] = useState("grid");
+
+  const [uploadOpen, setUploadOpen] = useState(false);
+
+  const [previewDocument, setPreviewDocument] = useState(null);
+
+  const [editDocument, setEditDocument] = useState(null);
+
+  const [downloadingId, setDownloadingId] = useState("");
+
+  const {
     documents,
-    setDocuments,
-  ] = useState(
-    initialUploadedDocuments
-  );
+    loading,
+    error,
+    uploading,
+    uploadProgress,
+    mutationLoading,
+    fetchDocuments,
+    uploadDocument,
+    updateDocument,
+    deleteDocument,
+  } = useDocuments({
+    search: query,
+    status,
+    projectId,
+    sort,
+    order: sort === "title" ? "asc" : "desc",
+  });
 
-  const [query, setQuery] =
-    useState("");
+  // Real projects for the toolbar filter and the modal.
+  const { projects } = useProjects();
 
-  const [status, setStatus] =
-    useState("all");
+  // ---------------------------------------------------
+  // Upload
+  // ---------------------------------------------------
 
-  const [project, setProject] =
-    useState("all");
+  const handleUpload = async (values) => {
+    const created = await uploadDocument(values);
 
-  const [sort, setSort] =
-    useState("recent");
+    toast.success(
+      "Document uploaded",
+      `"${created?.title || values.file.name}" was added.`
+    );
 
-  const [view, setView] =
-    useState("grid");
+    setUploadOpen(false);
+  };
 
-  const [
-    selectedDocument,
-    setSelectedDocument,
-  ] = useState(null);
+  // ---------------------------------------------------
+  // Delete
+  // ---------------------------------------------------
 
-  const filteredDocuments =
-    useMemo(() => {
-      let result = [...documents];
-
-      const normalizedQuery =
-        query.trim().toLowerCase();
-
-      if (normalizedQuery) {
-        result = result.filter(
-          (document) =>
-            [
-              document.name,
-              document.type,
-              document.project,
-              document.summary,
-              ...document.tags,
-            ]
-              .join(" ")
-              .toLowerCase()
-              .includes(normalizedQuery)
-        );
-      }
-
-      if (status !== "all") {
-        result = result.filter(
-          (document) =>
-            document.status === status
-        );
-      }
-
-      if (project !== "all") {
-        result = result.filter(
-          (document) =>
-            document.project === project
-        );
-      }
-
-      if (sort === "name") {
-        result.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-      }
-
-      if (sort === "size") {
-        result.sort(
-          (a, b) =>
-            parseFloat(b.size) -
-            parseFloat(a.size)
-        );
-      }
-
-      return result;
-    }, [
-      documents,
-      query,
-      status,
-      project,
-      sort,
-    ]);
-
-  const deleteDocument = (
-    documentId
-  ) => {
-    const confirmed =
-      window.confirm(
-        "Delete this uploaded document?"
-      );
+  const handleDelete = async (document) => {
+    const confirmed = window.confirm(
+      `Delete "${document.title}"? The uploaded file will be removed permanently.`
+    );
 
     if (!confirmed) return;
 
-    setDocuments((current) =>
-      current.filter(
-        (document) =>
-          document.id !== documentId
-      )
-    );
+    try {
+      await deleteDocument(document._id);
 
-    setSelectedDocument((current) =>
-      current?.id === documentId
-        ? null
-        : current
-    );
+      toast.success(
+        "Document deleted",
+        `"${document.title}" was removed.`
+      );
+    } catch (err) {
+      console.error(
+        "[Documents] Delete error:",
+        err
+      );
+
+      toast.error(
+        "Delete failed",
+        err?.message ||
+          "Unable to delete this document."
+      );
+    }
   };
 
-  const retryDocument = (
-    documentId
-  ) => {
-    setDocuments((current) =>
-      current.map((document) =>
-        document.id === documentId
-          ? {
-              ...document,
-              status: "processing",
-              progress: 18,
-            }
-          : document
-      )
-    );
+  const handleClearFilters = () => {
+    setQuery("");
+    setStatus("");
+    setProjectId("");
   };
+
+  // ---------------------------------------------------
+  // Download
+  // ---------------------------------------------------
+
+  /*
+   * The file is fetched through apiClient so the auth
+   * interceptor runs, then handed to the browser as a blob.
+   * originalFileName is the fallback when the server's
+   * Content-Disposition header cannot be parsed.
+   */
+  const handleDownload = async (document) => {
+    try {
+      setDownloadingId(document._id);
+
+      const response = await downloadDocument(document._id);
+
+      const filename = saveDocumentDownload(
+        response,
+        document.originalFileName || document.title
+      );
+
+      toast.success("Download started", `Saving "${filename}".`);
+    } catch (err) {
+      console.error("[Documents] Download error:", err);
+
+      toast.error(
+        "Download failed",
+        err?.message || "Unable to download this document."
+      );
+    } finally {
+      setDownloadingId("");
+    }
+  };
+
+  // ---------------------------------------------------
+  // Edit metadata
+  // ---------------------------------------------------
+
+  const handleEdit = async (values) => {
+    try {
+      await updateDocument(editDocument._id, values);
+
+      toast.success(
+        "Document updated",
+        "The document details were saved."
+      );
+
+      setEditDocument(null);
+
+      // Keep the open preview in sync with the saved record.
+      setPreviewDocument((current) =>
+        current && current._id === editDocument._id
+          ? { ...current, ...values }
+          : current
+      );
+    } catch (err) {
+      console.error("[Documents] Update error:", err);
+
+      toast.error(
+        "Update failed",
+        err?.message || "Unable to save these changes."
+      );
+
+      throw err;
+    }
+  };
+
+  const isLibraryEmpty =
+    !query.trim() && !status && !projectId;
 
   return (
     <div className="uploads-page">
-      <UploadsHeader />
-
-      <UploadStats
-        documents={documents}
+      <UploadsHeader
+        onUploadDocument={() => setUploadOpen(true)}
       />
+
+      <UploadStats documents={documents} />
 
       <UploadToolbar
         query={query}
         setQuery={setQuery}
         status={status}
         setStatus={setStatus}
-        project={project}
-        setProject={setProject}
+        projectId={projectId}
+        setProjectId={setProjectId}
+        projects={projects}
         sort={sort}
         setSort={setSort}
         view={view}
         setView={setView}
-        count={
-          filteredDocuments.length
-        }
+        count={documents.length}
       />
 
-      <DocumentsView
-        documents={
-          filteredDocuments
-        }
-        view={view}
-        onPreview={
-          setSelectedDocument
-        }
-        onDelete={
-          deleteDocument
-        }
-        onRetry={
-          retryDocument
-        }
+      {loading ? (
+        <div className="uploads-state">
+          <p>Loading your documents...</p>
+        </div>
+      ) : error ? (
+        <div className="uploads-state uploads-state--error">
+          <p>{error}</p>
+
+          <button type="button" onClick={fetchDocuments}>
+            Try Again
+          </button>
+        </div>
+      ) : (
+        <DocumentsView
+          documents={documents}
+          view={view}
+          onPreview={setPreviewDocument}
+          onDelete={handleDelete}
+          isLibraryEmpty={isLibraryEmpty}
+          onClearFilters={handleClearFilters}
+        />
+      )}
+
+      <DocumentUploadModal
+        open={uploadOpen}
+        uploading={uploading}
+        uploadProgress={uploadProgress}
+        onClose={() => setUploadOpen(false)}
+        onSubmit={handleUpload}
       />
 
       <DocumentPreviewModal
-        document={selectedDocument}
-        onClose={() =>
-          setSelectedDocument(null)
+        open={Boolean(previewDocument)}
+        document={previewDocument}
+        downloading={
+          downloadingId === previewDocument?._id
         }
+        onClose={() => setPreviewDocument(null)}
+        onDownload={handleDownload}
+        onEdit={(document) => {
+          setPreviewDocument(null);
+          setEditDocument(document);
+        }}
+        onDelete={(document) => {
+          setPreviewDocument(null);
+          handleDelete(document);
+        }}
+      />
+
+      <DocumentEditModal
+        open={Boolean(editDocument)}
+        document={editDocument}
+        saving={mutationLoading}
+        onClose={() => setEditDocument(null)}
+        onSubmit={handleEdit}
       />
     </div>
   );

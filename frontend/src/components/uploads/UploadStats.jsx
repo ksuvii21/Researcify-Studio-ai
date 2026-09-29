@@ -1,26 +1,41 @@
 import {
   CircleCheck,
   FileText,
+  HardDrive,
   Layers3,
-  LoaderCircle,
 } from "lucide-react";
 
-const UploadStats = ({
-  documents,
-}) => {
+import { formatFileSize } from "../../utils/fileFormat";
+
+const UploadStats = ({ documents }) => {
+  /*
+   * 'Ready' is the terminal success state of the RAG
+   * pipeline. Nothing reaches it yet: extraction and
+   * chunking arrive in 8G, so uploads sit at 'Uploaded'.
+   *
+   * This counts real stored values rather than an
+   * invented number, which means it correctly reads 0
+   * until processing exists.
+   */
   const ready = documents.filter(
     (document) =>
-      document.status === "ready"
+      document.processingStatus === "Ready"
   ).length;
 
-  const processing = documents.filter(
-    (document) =>
-      document.status === "processing"
-  ).length;
+  const totalSize = documents.reduce(
+    (total, document) =>
+      total + (document.fileSize || 0),
+    0
+  );
 
+  /*
+   * Chunk counts stay 0 until extraction lands in 8G,
+   * so this reports the real stored value rather than
+   * an invented number.
+   */
   const chunks = documents.reduce(
     (total, document) =>
-      total + document.chunks,
+      total + (document.chunkCount || 0),
     0
   );
 
@@ -36,9 +51,9 @@ const UploadStats = ({
       icon: CircleCheck,
     },
     {
-      label: "Processing",
-      value: processing,
-      icon: LoaderCircle,
+      label: "Storage Used",
+      value: formatFileSize(totalSize),
+      icon: HardDrive,
     },
     {
       label: "Indexed Chunks",

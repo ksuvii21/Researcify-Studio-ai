@@ -11,6 +11,7 @@ const ProjectOverview = ({
   project,
   paperCount,
   noteCount,
+  documentCount,
 }) => {
   /*
    * Only papers and documents are backed by real
@@ -36,8 +37,16 @@ const ProjectOverview = ({
       ? paperCount
       : project.paperIds?.length || 0;
 
-  const documentCount =
-    project.documentIds?.length || 0;
+  /*
+   * Prefer the live count from GET /documents?projectId=.
+   * project.documentIds is no longer the source of truth:
+   * UploadedDocument.projectId is canonical, and the old
+   * array is retained only for backward compatibility.
+   */
+  const documents =
+    typeof documentCount === "number"
+      ? documentCount
+      : project.documentIds?.length || 0;
 
   const stats = [
     {
@@ -53,7 +62,7 @@ const ProjectOverview = ({
     },
     {
       label: "Documents",
-      value: documentCount,
+      value: documents,
       icon: FileText,
     },
     {

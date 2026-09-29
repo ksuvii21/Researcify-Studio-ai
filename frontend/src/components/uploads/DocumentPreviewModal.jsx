@@ -1,52 +1,96 @@
 import {
-  Bot,
-  Copy,
+  CalendarDays,
+  Download,
   FileText,
   FolderKanban,
-  Layers3,
-  Sparkles,
+  HardDrive,
+  Info,
+  Pencil,
+  Trash2,
 } from "lucide-react";
-
-import {
-  useState,
-} from "react";
 
 import Modal from "../common/Modal";
 
+import {
+  formatDocumentDate,
+  formatFileSize,
+  formatFileType,
+  formatProcessingStatus,
+} from "../../utils/fileFormat";
+
+/*
+ * Document details.
+ *
+ * Every value below comes from the UploadedDocument record
+ * in MongoDB. There is deliberately no page count, word
+ * count, chunk count, AI summary or tag list: extraction
+ * does not run until 8G, so any such number would be
+ * fabricated.
+ *
+ * "Preview" here means metadata, not PDF/DOCX rendering.
+ * The file itself is fetched through the authenticated
+ * download route.
+ */
 const DocumentPreviewModal = ({
+  open = false,
   document,
   onClose,
+  onDownload,
+  onEdit,
+  onDelete,
+  downloading = false,
 }) => {
-  const [activeTab, setActiveTab] =
-    useState("overview");
-
-  const [copied, setCopied] =
-    useState(false);
-
   if (!document) return null;
 
-  const copyText = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        document.extractedText
-      );
+  const statusLabel = formatProcessingStatus(
+    document.processingStatus
+  );
 
-      setCopied(true);
+  const statusClass = statusLabel
+    .toLowerCase()
+    .replace(/\s+/g, "-");
 
-      setTimeout(() => {
-        setCopied(false);
-      }, 1500);
-    } catch {
-      setCopied(false);
-    }
-  };
+  /*
+   * projectId is populated with { title } by the API, so it
+   * is either an object or null. A bare ObjectId string has
+   * no title to show.
+   */
+  const projectTitle =
+    document.projectId && typeof document.projectId === "object"
+      ? document.projectId.title
+      : "";
+
+  const rows = [
+    {
+      label: "Original filename",
+      value: document.originalFileName || "—",
+    },
+    {
+      label: "File type",
+      value: formatFileType(document.mimeType),
+    },
+    {
+      label: "File size",
+      value: formatFileSize(document.fileSize),
+    },
+    {
+      label: "Uploaded",
+      value: formatDocumentDate(
+        document.uploadedAt || document.createdAt
+      ),
+    },
+    {
+      label: "Updated",
+      value: formatDocumentDate(document.updatedAt),
+    },
+  ];
 
   return (
     <Modal
-      open={Boolean(document)}
+      open={open}
       onClose={onClose}
-      title="Document Intelligence"
-      description={document.name}
+      title="Document Details"
+      description={document.originalFileName}
       icon={FileText}
       size="lg"
     >
@@ -57,18 +101,15 @@ const DocumentPreviewModal = ({
           </span>
 
           <div>
-            <span>
-              {document.type}
-            </span>
+            <span>{formatFileType(document.mimeType)}</span>
 
-            <h2>
-              {document.name}
-            </h2>
+            <h2>{document.title}</h2>
 
             <p>
-              {document.size} ·{" "}
-              {document.pages} pages ·{" "}
-              {document.words.toLocaleString()} words
+              {formatFileSize(document.fileSize)} ·{" "}
+              {formatDocumentDate(
+                document.uploadedAt || document.createdAt
+              )}
             </p>
           </div>
         </div>
@@ -77,173 +118,101 @@ const DocumentPreviewModal = ({
           <div>
             <FolderKanban size={16} />
 
-            <span>
-              Research Project
-            </span>
+            <span>Project</span>
 
-            <strong>
-              {document.project}
-            </strong>
+            <strong>{projectTitle || "Not assigned"}</strong>
           </div>
 
           <div>
-            <Layers3 size={16} />
+            <HardDrive size={16} />
 
-            <span>
-              Indexed Content
+            <span>Status</span>
+
+            <strong>{statusLabel}</strong>
+          </div>
+        </div>
+
+        <div className="document-preview__overview">
+          <section>
+            <span className="document-preview__label">
+              Description
             </span>
 
-            <strong>
-              {document.chunks} chunks
-            </strong>
-          </div>
+            <p>
+              {document.description ||
+                "No description added."}
+            </p>
+          </section>
+
+          <section>
+            <span className="document-preview__label">
+              Document Information
+            </span>
+
+            <div className="document-preview__information">
+              {rows.map((row) => (
+                <div key={row.label}>
+                  <span>{row.label}</span>
+                  <strong>{row.value}</strong>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {document.processingError && (
+            <section>
+              <span className="document-preview__label">
+                Processing Error
+              </span>
+
+              <p>{document.processingError}</p>
+            </section>
+          )}
         </div>
-
-        <nav className="document-preview__tabs">
-          <button
-            type="button"
-            className={
-              activeTab === "overview"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setActiveTab("overview")
-            }
-          >
-            Overview
-          </button>
-
-          <button
-            type="button"
-            className={
-              activeTab === "content"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setActiveTab("content")
-            }
-          >
-            Extracted Content
-          </button>
-        </nav>
-
-        {activeTab === "overview" && (
-          <div className="document-preview__overview">
-            <section>
-              <span className="document-preview__label">
-                AI Summary
-              </span>
-
-              <div className="document-preview__summary">
-                <Sparkles size={17} />
-
-                <p>
-                  {document.summary}
-                </p>
-              </div>
-            </section>
-
-            <section>
-              <span className="document-preview__label">
-                Research Topics
-              </span>
-
-              <div className="document-preview__tags">
-                {document.tags.map(
-                  (tag) => (
-                    <span key={tag}>
-                      {tag}
-                    </span>
-                  )
-                )}
-              </div>
-            </section>
-
-            <section>
-              <span className="document-preview__label">
-                Document Information
-              </span>
-
-              <div className="document-preview__information">
-                <div>
-                  <span>Uploaded</span>
-                  <strong>
-                    {document.uploadedAt}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>File type</span>
-                  <strong>
-                    {document.type}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>Pages</span>
-                  <strong>
-                    {document.pages}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>Indexed chunks</span>
-                  <strong>
-                    {document.chunks}
-                  </strong>
-                </div>
-              </div>
-            </section>
-          </div>
-        )}
-
-        {activeTab === "content" && (
-          <div className="document-preview__content">
-            <div className="document-preview__content-header">
-              <div>
-                <span className="document-preview__label">
-                  Extracted Text
-                </span>
-
-                <p>
-                  Preview of processed document
-                  content.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={copyText}
-              >
-                <Copy size={15} />
-                {copied
-                  ? "Copied"
-                  : "Copy"}
-              </button>
-            </div>
-
-            <div className="document-preview__text">
-              {document.extractedText}
-            </div>
-          </div>
-        )}
 
         <div className="document-preview__actions">
-          <button type="button">
-            <FolderKanban size={15} />
-            Change Project
+          <button
+            type="button"
+            onClick={() => onDownload?.(document)}
+            disabled={downloading}
+          >
+            <Download size={15} />
+            {downloading ? "Downloading..." : "Download"}
           </button>
 
           <button
             type="button"
-            className="document-preview__ai"
+            onClick={() => onEdit?.(document)}
           >
-            <Bot size={16} />
-            Ask AI About Document
+            <Pencil size={15} />
+            Edit
+          </button>
+
+          <button
+            type="button"
+            className="document-preview__delete"
+            onClick={() => onDelete?.(document)}
+          >
+            <Trash2 size={15} />
+            Delete
           </button>
         </div>
+
+        {/*
+         * Surface the processing state honestly rather than
+         * implying the document is already searchable.
+         */}
+        <p className="document-preview__note">
+          <Info size={14} />
+          {statusLabel === "Ready"
+            ? "This document is ready for research."
+            : "Text extraction has not run yet. This document becomes searchable once processing lands."}
+        </p>
+
+        <span className="document-preview__status">
+          <CalendarDays size={13} />
+          {statusClass}
+        </span>
       </div>
     </Modal>
   );

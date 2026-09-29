@@ -26,10 +26,12 @@ import ProjectAI from "../components/projects/ProjectAI";
 import ProjectActivity from "../components/projects/ProjectActivity";
 import AddPaperToProjectModal from "../components/projects/AddPaperToProjectModal";
 import NoteFormModal from "../components/notes/NoteFormModal";
+import DocumentUploadModal from "../components/uploads/DocumentUploadModal";
 
 import useProject from "../hooks/useProject";
 import useProjectPapers from "../hooks/useProjectPapers";
 import useNotes from "../hooks/useNotes";
+import useDocuments from "../hooks/useDocuments";
 import useToast from "../hooks/useToast";
 
 import "../components/projects/projects.css";
@@ -89,6 +91,8 @@ const ProjectDetailPage = () => {
   const [editingNote, setEditingNote] =
     useState(null);
 
+  const [uploadOpen, setUploadOpen] = useState(false);
+
   const {
     project,
     loading,
@@ -118,6 +122,68 @@ const ProjectDetailPage = () => {
     projectId: project?._id || "",
     autoFetch: Boolean(project?._id),
   });
+
+  const {
+    documents: projectDocuments,
+    loading: documentsLoading,
+    error: documentsError,
+    uploading: documentsUploading,
+    uploadProgress: documentsUploadProgress,
+    fetchDocuments,
+    uploadDocument,
+    deleteDocument,
+  } = useDocuments({
+    projectId: project?._id || "",
+    autoFetch: Boolean(project?._id),
+  });
+
+  // ---------------------------------------------------
+  // Project documents
+  // ---------------------------------------------------
+
+  const handleUploadDocument = async (values) => {
+    /*
+     * The project is bound automatically, so the user
+     * is never asked to pick the project they are
+     * already inside.
+     */
+    const created = await uploadDocument({
+      ...values,
+      projectId: project._id,
+    });
+
+    toast.success(
+      "Document uploaded",
+      `"${created?.title || values.file.name}" was added.`
+    );
+
+    setUploadOpen(false);
+  };
+
+  const handleDeleteDocument = async (document) => {
+    const confirmed = window.confirm(
+      `Delete "${document.title}"? The uploaded file will be removed permanently.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteDocument(document._id);
+
+      toast.success("Document deleted", document.title);
+    } catch (err) {
+      console.error(
+        "[ProjectDocuments] Delete error:",
+        err
+      );
+
+      toast.error(
+        "Delete failed",
+        err?.message ||
+          "Unable to delete this document."
+      );
+    }
+  };
 
   // ---------------------------------------------------
   // Project notes
@@ -269,7 +335,16 @@ const ProjectDetailPage = () => {
         );
 
       case "documents":
-        return <ProjectDocuments />;
+        return (
+          <ProjectDocuments
+            documents={projectDocuments}
+            loading={documentsLoading}
+            error={documentsError}
+            onUploadDocument={() => setUploadOpen(true)}
+            onDeleteDocument={handleDeleteDocument}
+            onRetry={fetchDocuments}
+          />
+        );
 
       case "questions":
         return <ProjectQuestions />;
@@ -286,6 +361,7 @@ const ProjectDetailPage = () => {
             project={project}
             paperCount={projectPapers.length}
             noteCount={projectNotes.length}
+            documentCount={projectDocuments.length}
           />
         );
     }
@@ -342,6 +418,15 @@ const ProjectDetailPage = () => {
         loading={noteMutationLoading}
         onClose={handleCloseNoteForm}
         onSubmit={handleNoteSubmit}
+      />
+
+      <DocumentUploadModal
+        open={uploadOpen}
+        lockedProjectId={project._id}
+        uploading={documentsUploading}
+        uploadProgress={documentsUploadProgress}
+        onClose={() => setUploadOpen(false)}
+        onSubmit={handleUploadDocument}
       />
     </div>
   );

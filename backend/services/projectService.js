@@ -1,6 +1,9 @@
+const mongoose = require("mongoose");
+
 const ResearchProject = require("../models/ResearchProject");
 const Paper = require("../models/Paper");
 const Note = require("../models/Note");
+const UploadedDocument = require("../models/UploadedDocument");
 const ApiError = require("../utils/ApiError");
 
 // -----------------------------------------------------
@@ -90,6 +93,54 @@ const getProjects = async (userId, options = {}) => {
       [sortField]: sortOrder,
     })
     .lean();
+
+  /*
+   * Attach a real document count.
+   *
+   * ResearchProject.documentIds is no longer written to:
+   * UploadedDocument.projectId is the canonical
+   * relationship (a document belongs to at most one
+   * project). Reading documentIds here would always
+   * report 0, so the count is resolved from the
+   * UploadedDocument collection instead.
+   *
+   * One grouped aggregation for the whole page keeps this
+   * to a single extra query rather than one per card.
+   */
+  if (projects.length) {
+    const counts = await UploadedDocument.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(
+            String(userId)
+          ),
+          projectId: {
+            $in: projects.map(
+              (project) => project._id
+            ),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$projectId",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const countByProject = new Map(
+      counts.map((entry) => [
+        String(entry._id),
+        entry.count,
+      ])
+    );
+
+    projects.forEach((project) => {
+      project.documentCount =
+        countByProject.get(String(project._id)) || 0;
+    });
+  }
 
   return projects;
 };
@@ -191,6 +242,23 @@ const deleteProject = async (userId, projectId) => {
    * cleared, leaving the note intact as a general note.
    */
   await Note.updateMany(
+    {
+      userId,
+      projectId: project._id,
+    },
+    {
+      $set: {
+        projectId: null,
+      },
+    }
+  );
+
+  /*
+   * Same rule for documents: the uploaded file is the
+   * user's research material and outlives the project it
+   * was filed under. Detach it rather than delete it.
+   */
+  await UploadedDocument.updateMany(
     {
       userId,
       projectId: project._id,

@@ -1,39 +1,95 @@
 import {
-  Bot,
   CircleAlert,
   CircleCheck,
   Clock3,
   Eye,
   FileText,
   FolderKanban,
-  Layers3,
   MoreHorizontal,
-  RefreshCw,
+  Pencil,
   Trash2,
 } from "lucide-react";
 
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  formatDocumentDate,
+  formatFileSize,
+  formatFileType,
+  formatProcessingStatus,
+  isPendingStatus,
+} from "../../utils/fileFormat";
+
 const DocumentCard = ({
-  document,
+  document: doc,
   view,
   onPreview,
+  onEdit,
   onDelete,
-  onRetry,
 }) => {
-  const ready =
-    document.status === "ready";
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const processing =
-    document.status === "processing";
+  const menuRef = useRef(null);
 
-  const failed =
-    document.status === "failed";
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "mousedown",
+      handlePointerDown
+    );
+
+    document.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handlePointerDown
+      );
+
+      document.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, [menuOpen]);
+
+  const statusLabel = formatProcessingStatus(
+    doc.processingStatus
+  );
+
+  const statusClass = statusLabel
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
+  const projectTitle = doc.projectId?.title;
 
   return (
     <article
       className={`document-card ${
-        view === "list"
-          ? "document-card--list"
-          : ""
+        view === "list" ? "document-card--list" : ""
       }`}
     >
       <div className="document-card__top">
@@ -41,183 +97,161 @@ const DocumentCard = ({
           <FileText size={21} />
         </span>
 
-        <div className="document-card__status-wrap">
+        <div
+          className="document-card__status-wrap"
+          ref={menuRef}
+        >
           <span
-            className={`document-status document-status--${document.status}`}
+            className={`document-status document-status--${statusClass}`}
           >
-            {ready && (
+            {statusLabel === "Ready" && (
               <CircleCheck size={14} />
             )}
 
-            {processing && (
+            {isPendingStatus(statusLabel) && (
               <Clock3 size={14} />
             )}
 
-            {failed && (
+            {statusLabel === "Failed" && (
               <CircleAlert size={14} />
             )}
 
-            {ready && "Ready"}
-            {processing && "Processing"}
-            {failed && "Failed"}
+            {statusLabel}
           </span>
 
           <button
             type="button"
             className="document-card__more"
             aria-label="Document options"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
           >
             <MoreHorizontal size={18} />
           </button>
+
+          {menuOpen && (
+            <div
+              className="document-card__menu-list"
+              role="menu"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onPreview?.(doc);
+                }}
+              >
+                <Eye size={14} />
+                View details
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onEdit?.(doc);
+                }}
+              >
+                <Pencil size={14} />
+                Edit metadata
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                className="danger"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onDelete(doc);
+                }}
+              >
+                <Trash2 size={14} />
+                Delete document
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="document-card__content">
+      <div
+        className="document-card__content"
+        onClick={() => onPreview?.(doc)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onPreview?.(doc);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
         <span className="document-card__type">
-          {document.type}
+          {formatFileType(doc.mimeType)}
         </span>
 
-        <h2>{document.name}</h2>
+        <h2>{doc.title}</h2>
 
         <p className="document-card__meta">
-          {document.size}
-
-          {document.pages > 0 && (
-            <>
-              <span>•</span>
-              {document.pages} pages
-            </>
+          {formatFileSize(doc.fileSize)}
+          <span>•</span>
+          {formatDocumentDate(
+            doc.uploadedAt || doc.createdAt
           )}
         </p>
 
-        <div className="document-card__project">
-          <FolderKanban size={14} />
-
-          <span>
-            {document.project}
-          </span>
-        </div>
-
-        {ready && document.summary && (
-          <p className="document-card__summary">
-            {document.summary}
-          </p>
-        )}
-
-        {processing && (
-          <div className="document-processing">
-            <div className="document-processing__heading">
-              <span>
-                Processing document
-              </span>
-
-              <strong>
-                {document.progress}%
-              </strong>
-            </div>
-
-            <div className="document-processing__track">
-              <span
-                style={{
-                  width: `${document.progress}%`,
-                }}
-              />
-            </div>
-
-            <p>
-              Extracting and indexing research
-              content...
+        {doc.originalFileName &&
+          doc.originalFileName !== doc.title && (
+            <p className="document-card__filename">
+              {doc.originalFileName}
             </p>
+          )}
+
+        {projectTitle ? (
+          <div className="document-card__project">
+            <FolderKanban size={14} />
+            <span>{projectTitle}</span>
+          </div>
+        ) : (
+          <div className="document-card__project document-card__project--none">
+            <FolderKanban size={14} />
+            <span>Not linked to a project</span>
           </div>
         )}
 
-        {failed && (
+        {doc.description && (
+          <p className="document-card__summary">
+            {doc.description}
+          </p>
+        )}
+
+        {doc.processingError && (
           <div className="document-failed">
             <CircleAlert size={16} />
 
             <div>
-              <strong>
-                Processing failed
-              </strong>
-
-              <p>
-                Researcify could not process this
-                document.
-              </p>
+              <strong>Processing failed</strong>
+              <p>{doc.processingError}</p>
             </div>
-          </div>
-        )}
-
-        {ready && (
-          <div className="document-card__research-meta">
-            <span>
-              <Layers3 size={14} />
-              {document.chunks} chunks
-            </span>
-
-            <span>
-              {document.words.toLocaleString()} words
-            </span>
-          </div>
-        )}
-
-        {document.tags.length > 0 && (
-          <div className="document-card__tags">
-            {document.tags
-              .slice(0, 3)
-              .map((tag) => (
-                <span key={tag}>
-                  {tag}
-                </span>
-              ))}
           </div>
         )}
       </div>
 
       <footer className="document-card__footer">
         <span>
-          {document.uploadedAt}
+          {statusLabel === "Ready"
+            ? "Ready for research"
+            : "Awaiting processing"}
         </span>
 
         <div>
-          {ready && (
-            <>
-              <button
-                type="button"
-                onClick={() =>
-                  onPreview(document)
-                }
-              >
-                <Eye size={15} />
-                Preview
-              </button>
-
-              <button type="button">
-                <Bot size={15} />
-                Ask AI
-              </button>
-            </>
-          )}
-
-          {failed && (
-            <button
-              type="button"
-              onClick={() =>
-                onRetry(document.id)
-              }
-            >
-              <RefreshCw size={15} />
-              Retry
-            </button>
-          )}
-
           <button
             type="button"
             className="document-delete"
-            onClick={() =>
-              onDelete(document.id)
-            }
-            aria-label="Delete document"
+            onClick={() => onDelete(doc)}
+            aria-label={`Delete ${doc.title}`}
           >
             <Trash2 size={15} />
           </button>

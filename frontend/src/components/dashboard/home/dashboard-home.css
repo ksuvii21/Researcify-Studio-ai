@@ -956,6 +956,116 @@
 }
 
 /* ========================================
+   RECENT DOCUMENTS
+======================================== */
+
+.recent-documents__list {
+  margin-top: 16px;
+
+  border-top: 1px solid var(--border);
+}
+
+/*
+ * Each row is a button, so the whole item is the click
+ * target that opens the Documents workspace.
+ */
+.recent-document {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 2px;
+
+  border: 0;
+  border-bottom: 1px solid var(--border);
+
+  background: transparent;
+
+  font-family: inherit;
+  text-align: left;
+}
+
+.recent-document:last-child {
+  border-bottom: 0;
+}
+
+.recent-document:hover {
+  background: var(--surface-hover);
+}
+
+.recent-document__icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 8px;
+
+  background: var(--accent-soft);
+
+  color: var(--accent);
+}
+
+.recent-document__info {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.recent-document__info strong {
+  overflow: hidden;
+
+  color: var(--text);
+
+  font-size: 13px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-document__info span {
+  overflow: hidden;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-document__meta,
+.recent-document__date {
+  flex-shrink: 0;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+
+  white-space: nowrap;
+}
+
+.recent-documents__more {
+  margin-top: 11px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+}
+
+/* ========================================
    RECENT PAPERS
 ======================================== */
 
@@ -1655,6 +1765,24 @@
   background: var(--accent-soft);
 
   color: var(--accent);
+}
+
+/*
+ * Empty and loading state for a tab with no real records
+ * yet. Shown instead of sample rows.
+ */
+.library-preview__state {
+  margin-top: 12px;
+  padding: 32px 18px;
+
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+
+  text-align: center;
 }
 
 .library-preview__list {
