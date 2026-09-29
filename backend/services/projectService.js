@@ -5,6 +5,7 @@ const Paper = require("../models/Paper");
 const Note = require("../models/Note");
 const UploadedDocument = require("../models/UploadedDocument");
 const ApiError = require("../utils/ApiError");
+const { recordActivity, ACTIVITY_ACTIONS } = require("./activityService");
 
 // -----------------------------------------------------
 // Create Project
@@ -28,6 +29,17 @@ const createProject = async (userId, projectData) => {
     description: projectData.description?.trim() || "",
     researchQuestion: projectData.researchQuestion?.trim() || "",
     status: projectData.status || "Active",
+  });
+
+  await recordActivity({
+    userId,
+    projectId: project._id,
+    action: ACTIVITY_ACTIONS.PROJECT_CREATED,
+    entityType: "project",
+    entityId: project._id,
+    metadata: {
+      title: project.title,
+    },
   });
 
   return project;
@@ -220,6 +232,17 @@ const updateProject = async (userId, projectId, updateData) => {
 
   await project.save();
 
+  await recordActivity({
+    userId,
+    projectId: project._id,
+    action: ACTIVITY_ACTIONS.PROJECT_UPDATED,
+    entityType: "project",
+    entityId: project._id,
+    metadata: {
+      title: project.title,
+    },
+  });
+
   return project;
 };
 
@@ -324,6 +347,18 @@ const addPaperToProject = async (
 
   await project.save();
 
+  await recordActivity({
+    userId,
+    projectId: project._id,
+    action: ACTIVITY_ACTIONS.PAPER_ADDED_TO_PROJECT,
+    entityType: "paper",
+    entityId: paper._id,
+    metadata: {
+      title: paper.title,
+      projectTitle: project.title,
+    },
+  });
+
   return project;
 };
 
@@ -358,6 +393,17 @@ const removePaperFromProject = async (
   project.paperIds.pull(paperId);
 
   await project.save();
+
+  await recordActivity({
+    userId,
+    projectId: project._id,
+    action: ACTIVITY_ACTIONS.PAPER_REMOVED_FROM_PROJECT,
+    entityType: "paper",
+    entityId: paperId,
+    metadata: {
+      projectTitle: project.title,
+    },
+  });
 
   return project;
 };

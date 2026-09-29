@@ -11,6 +11,7 @@ const projectRoutes = require("./routes/projectRoutes");
 const noteRoutes = require("./routes/noteRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
+const activityRoutes = require("./routes/activityRoutes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -79,6 +80,8 @@ app.use("/api/v1/notes", noteRoutes);
 app.use("/api/v1/documents", documentRoutes);
 
 app.use("/api/v1/collections", collectionRoutes);
+
+app.use("/api/v1/activities", activityRoutes);
 
 // ================================
 // 404 HANDLER

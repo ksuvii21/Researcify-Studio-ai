@@ -3,6 +3,7 @@ const Paper = require("../models/Paper");
 const ResearchProject = require("../models/ResearchProject");
 
 const ApiError = require("../utils/ApiError");
+const { recordActivity, ACTIVITY_ACTIONS } = require("./activityService");
 
 // -----------------------------------------------------
 // Relationship validation
@@ -81,6 +82,20 @@ const createNote = async (userId, data) => {
     isPinned: Boolean(data.isPinned),
 
     isArchived: Boolean(data.isArchived),
+  }).then(async (note) => {
+    await recordActivity({
+      userId,
+      projectId: note.projectId || null,
+      action: ACTIVITY_ACTIONS.NOTE_CREATED,
+      entityType: "note",
+      entityId: note._id,
+      metadata: {
+        title: note.title,
+        ...(note.projectId && { projectId: note.projectId }),
+        ...(note.paperId && { paperId: note.paperId }),
+      },
+    });
+    return note;
   });
 };
 

@@ -1,0 +1,103 @@
+.project-activity__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.project-activity__header h2 {
+  margin: 0 0 4px;
+
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.project-activity__header p {
+  margin: 0;
+
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Skeleton loading */
+
+.activity-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-skeleton__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  height: 56px;
+}
+
+.activity-skeleton__icon {
+  flex-shrink: 0;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: var(--radius-sm);
+
+  background: linear-gradient(
+    90deg,
+    var(--surface-hover) 25%,
+    var(--surface-alt) 50%,
+    var(--surface-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.activity-skeleton__content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-skeleton__line {
+  height: 12px;
+
+  border-radius: var(--radius-xs);
+
+  background: linear-gradient(
+    90deg,
+    var(--surface-hover) 25%,
+    var(--surface-alt) 50%,
+    var(--surface-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.activity-skeleton__line--short {
+  width: 60%;
+}
+
+.activity-skeleton__line--time {
+  width: 35%;
+  height: 10px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Reuse activity.css empty/load-more styles via classNames */

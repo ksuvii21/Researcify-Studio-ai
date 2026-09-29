@@ -3,6 +3,7 @@ const ResearchProject = require("../models/ResearchProject");
 const Note = require("../models/Note");
 const Collection = require("../models/Collection");
 const ApiError = require("../utils/ApiError");
+const { recordActivity, ACTIVITY_ACTIONS } = require("./activityService");
 
 // -----------------------------------------------------
 // Normalise array-ish input
@@ -80,6 +81,18 @@ const createPaper = async (userId, data) => {
     externalId: data.externalId?.trim() || null,
 
     isFavorite: Boolean(data.isFavorite),
+  }).then(async (paper) => {
+    await recordActivity({
+      userId,
+      projectId: null,
+      action: ACTIVITY_ACTIONS.PAPER_SAVED,
+      entityType: "paper",
+      entityId: paper._id,
+      metadata: {
+        title: paper.title,
+      },
+    });
+    return paper;
   });
 };
 

@@ -33,7 +33,16 @@ const verifyToken = (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    req.user = decoded;
+    /*
+     * The JWT payload uses `id` but the rest of the
+     * codebase expects `req.user._id`. Normalize here
+     * so downstream code doesn't need to know the
+     * token's internal field name.
+     */
+    req.user = {
+      _id: decoded.id || decoded._id,
+      ...decoded,
+    };
 
     next();
 

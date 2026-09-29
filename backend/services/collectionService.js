@@ -5,6 +5,7 @@ const Paper = require("../models/Paper");
 const UploadedDocument = require("../models/UploadedDocument");
 
 const ApiError = require("../utils/ApiError");
+const { recordActivity, ACTIVITY_ACTIONS } = require("./activityService");
 
 // -----------------------------------------------------
 // Id validation
@@ -93,6 +94,17 @@ const createCollection = async (userId, data) => {
     name,
 
     description: data.description?.trim() || "",
+  });
+
+  await recordActivity({
+    userId,
+    projectId: null,
+    action: ACTIVITY_ACTIONS.COLLECTION_CREATED,
+    entityType: "collection",
+    entityId: collection._id,
+    metadata: {
+      title: collection.name,
+    },
   });
 
   return withCounts(collection.toObject());
@@ -360,6 +372,18 @@ const addPaper = async (userId, collectionId, paperId) => {
 
   await collection.save();
 
+  await recordActivity({
+    userId,
+    projectId: null,
+    action: ACTIVITY_ACTIONS.PAPER_ADDED_TO_COLLECTION,
+    entityType: "paper",
+    entityId: paper._id,
+    metadata: {
+      title: paper.title,
+      collectionTitle: collection.name,
+    },
+  });
+
   return withCounts(collection.toObject());
 };
 
@@ -398,6 +422,17 @@ const removePaper = async (
   }
 
   await collection.save();
+
+  await recordActivity({
+    userId,
+    projectId: null,
+    action: ACTIVITY_ACTIONS.PAPER_REMOVED_FROM_COLLECTION,
+    entityType: "paper",
+    entityId: paperId,
+    metadata: {
+      collectionTitle: collection.name,
+    },
+  });
 
   return withCounts(collection.toObject());
 };
@@ -449,6 +484,18 @@ const addDocument = async (
 
   await collection.save();
 
+  await recordActivity({
+    userId,
+    projectId: null,
+    action: ACTIVITY_ACTIONS.DOCUMENT_ADDED_TO_COLLECTION,
+    entityType: "document",
+    entityId: document._id,
+    metadata: {
+      title: document.title,
+      collectionTitle: collection.name,
+    },
+  });
+
   return withCounts(collection.toObject());
 };
 
@@ -487,6 +534,17 @@ const removeDocument = async (
   }
 
   await collection.save();
+
+  await recordActivity({
+    userId,
+    projectId: null,
+    action: ACTIVITY_ACTIONS.DOCUMENT_REMOVED_FROM_COLLECTION,
+    entityType: "document",
+    entityId: documentId,
+    metadata: {
+      collectionTitle: collection.name,
+    },
+  });
 
   return withCounts(collection.toObject());
 };

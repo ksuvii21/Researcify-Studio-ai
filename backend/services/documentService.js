@@ -10,6 +10,7 @@ const Note = require("../models/Note");
 const Collection = require("../models/Collection");
 
 const ApiError = require("../utils/ApiError");
+const { recordActivity, ACTIVITY_ACTIONS } = require("./activityService");
 
 // -----------------------------------------------------
 // Id validation
@@ -137,6 +138,19 @@ const createDocument = async (userId, file, data) => {
     document.fileUrl = `/api/v1/documents/${document._id}/download`;
 
     await document.save();
+
+    await recordActivity({
+      userId,
+      projectId: document.projectId || null,
+      action: ACTIVITY_ACTIONS.DOCUMENT_UPLOADED,
+      entityType: "document",
+      entityId: document._id,
+      metadata: {
+        title: document.title,
+        originalName: document.originalFileName,
+        ...(document.projectId && { projectId: document.projectId }),
+      },
+    });
 
     return document;
   } catch (error) {
