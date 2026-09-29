@@ -357,19 +357,11 @@
   color: var(--accent);
 }
 
-.overview-card__trend {
-  width: 67px;
-  height: 30px;
-
-  overflow: visible;
-}
-
-.overview-card__trend polyline {
-  stroke: var(--accent);
-  stroke-width: 1.5;
-
-  opacity: 0.65;
-}
+/*
+ * .overview-card__trend was removed with the fabricated
+ * sparklines. The styles return in 8F once real
+ * timestamped Activity data can drive them.
+ */
 
 .overview-card__value {
   display: block;

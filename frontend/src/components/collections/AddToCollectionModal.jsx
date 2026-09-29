@@ -430,9 +430,7 @@ const AddToCollectionModal = ({
             ) : (
               <>
                 <FolderPlus size={14} />
-                {isResourceMode
-                  ? "Add to Collection"
-                  : "Add to Collection"}
+                Add to Collection
               </>
             )}
           </button>

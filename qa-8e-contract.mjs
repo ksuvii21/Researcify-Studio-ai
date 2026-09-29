@@ -6,10 +6,11 @@ import fs from "node:fs";
  *
  *   node qa-8e-contract.mjs
  *
- * The Playwright suites (qa-8e-ownership.mjs,
- * qa-8e-cascade.mjs) cover the same rules through the UI;
- * this script exists so the security-critical assertions
- * can be executed without a browser harness.
+ * The browser suite (qa-8e-ui.mjs) covers the same rules
+ * through the real UI; this script exists so the
+ * security-critical assertions can be executed without a
+ * browser harness. qa-8e-api.mjs extends it with the
+ * cross-user isolation matrix.
  */
 
 const TOKEN = fs

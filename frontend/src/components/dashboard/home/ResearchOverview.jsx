@@ -1,40 +1,29 @@
 import {
   BookMarked,
   FolderKanban,
+  Heart,
   MessageSquareText,
   NotebookPen,
-  TrendingUp,
 } from "lucide-react";
 
 import useDashboardProjects from "../../../hooks/useDashboardProjects";
 import useDashboardPapers from "../../../hooks/useDashboardPapers";
 import useDashboardNotes from "../../../hooks/useDashboardNotes";
 
-const MiniTrend = ({ points }) => {
-  const coordinates = points
-    .map((point, index) => {
-      const x = (index / (points.length - 1)) * 100;
-      const y = 38 - (point / 100) * 34;
-
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg
-      className="overview-card__trend"
-      viewBox="0 0 100 40"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <polyline
-        points={coordinates}
-        fill="none"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
-};
+/*
+ * These cards show current totals only.
+ *
+ * There are deliberately no sparklines and no time window.
+ * The previous version of this component drew a
+ * MiniTrend polyline from a hardcoded array per card
+ * (trend: [35, 48, 42, 62, 57, 76, 82]) under a "Last 30
+ * days" label, which asserted a history that no record
+ * supported.
+ *
+ * Real trends become possible once Activity stores
+ * timestamped events (Phase 8F); until then the honest
+ * presentation is a count with no implied trajectory.
+ */
 
 const ResearchOverview = () => {
   const {
@@ -56,8 +45,8 @@ const ResearchOverview = () => {
   } = useDashboardNotes();
 
   /*
-   * Projects, Papers, Notes and Documents all read real
-   * records (Phases 8A / 8B / 8C / 8D).
+   * Projects, Papers and Notes all read real records
+   * (Phases 8A / 8B / 8C).
    *
    * AI Conversations is not connected yet, so it shows an
    * em dash rather than a sample number that could be
@@ -69,21 +58,18 @@ const ResearchOverview = () => {
       value: papersLoading ? "—" : totalPapers,
       change: "Saved in your library",
       icon: BookMarked,
-      trend: [35, 48, 42, 62, 57, 76, 82],
     },
     {
       label: "Active Projects",
       value: loading ? "—" : activeProjects,
       change: `${totalProjects} total`,
       icon: FolderKanban,
-      trend: [32, 35, 43, 41, 52, 57, 61],
     },
     {
       label: "Favorite Papers",
       value: papersLoading ? "—" : favoritePapers,
       change: "Starred in your library",
-      icon: TrendingUp,
-      trend: [28, 40, 37, 51, 65, 61, 77],
+      icon: Heart,
     },
     {
       label: "Research Notes",
@@ -92,14 +78,12 @@ const ResearchOverview = () => {
         ? "Loading"
         : `${pinnedNotes} pinned`,
       icon: NotebookPen,
-      trend: [25, 31, 47, 43, 58, 65, 72],
     },
     {
       label: "AI Conversations",
       value: "—",
       change: "Not connected yet",
       icon: MessageSquareText,
-      trend: [22, 36, 31, 48, 44, 64, 70],
     },
   ];
 
@@ -110,10 +94,6 @@ const ResearchOverview = () => {
           <h2>Research Overview</h2>
           <p>Your workspace at a glance.</p>
         </div>
-
-        <span className="dashboard-section__meta">
-          Last 30 days
-        </span>
       </div>
 
       <div className="research-overview-grid">
@@ -123,7 +103,6 @@ const ResearchOverview = () => {
             value,
             change,
             icon: Icon,
-            trend,
           }) => (
             <article
               className="overview-card"
@@ -133,8 +112,6 @@ const ResearchOverview = () => {
                 <div className="overview-card__icon">
                   <Icon size={17} />
                 </div>
-
-                <MiniTrend points={trend} />
               </div>
 
               <strong className="overview-card__value">

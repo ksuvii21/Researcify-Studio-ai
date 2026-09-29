@@ -3,9 +3,18 @@ import {
   Clock3,
   FolderOpen,
   Heart,
-  Upload,
 } from "lucide-react";
 
+/*
+ * Documents are not listed here. /uploads is the dedicated
+ * Documents workspace, and repeating them under the Library
+ * would create a second, differently-behaving document UI.
+ *
+ * The previous "Uploaded" tab was worse than absent: it
+ * matched none of the branches in LibraryPage, so it fell
+ * through to the all-papers view and silently showed papers
+ * under a documents label.
+ */
 const tabs = [
   {
     id: "all",
@@ -21,11 +30,6 @@ const tabs = [
     id: "recent",
     label: "Recently Added",
     icon: Clock3,
-  },
-  {
-    id: "uploaded",
-    label: "Uploaded",
-    icon: Upload,
   },
   {
     id: "collections",
