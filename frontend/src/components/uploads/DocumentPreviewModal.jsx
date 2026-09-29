@@ -3,13 +3,18 @@ import {
   Download,
   FileText,
   FolderKanban,
+  FolderPlus,
   HardDrive,
   Info,
   Pencil,
   Trash2,
 } from "lucide-react";
 
+import { useState } from "react";
+
 import Modal from "../common/Modal";
+
+import AddToCollectionModal from "../collections/AddToCollectionModal";
 
 import {
   formatDocumentDate,
@@ -30,6 +35,10 @@ import {
  * "Preview" here means metadata, not PDF/DOCX rendering.
  * The file itself is fetched through the authenticated
  * download route.
+ *
+ * Collections are organized on the Collection record, not
+ * stored on the document, so "Add to Collection" reuses the
+ * shared relationship modal rather than owning any logic.
  */
 const DocumentPreviewModal = ({
   open = false,
@@ -38,8 +47,11 @@ const DocumentPreviewModal = ({
   onDownload,
   onEdit,
   onDelete,
+  onAddedToCollection,
   downloading = false,
 }) => {
+  const [collectionOpen, setCollectionOpen] = useState(false);
+
   if (!document) return null;
 
   const statusLabel = formatProcessingStatus(
@@ -86,14 +98,19 @@ const DocumentPreviewModal = ({
   ];
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Document Details"
-      description={document.originalFileName}
-      icon={FileText}
-      size="lg"
-    >
+    <>
+      {/*
+       * Suspended while the collection picker is open so
+       * only one modal owns the Escape key at a time.
+       */}
+      <Modal
+        open={open && !collectionOpen}
+        onClose={onClose}
+        title="Document Details"
+        description={document.originalFileName}
+        icon={FileText}
+        size="lg"
+      >
       <div className="document-preview">
         <div className="document-preview__hero">
           <span className="document-preview__icon">
@@ -190,6 +207,16 @@ const DocumentPreviewModal = ({
 
           <button
             type="button"
+            onClick={() =>
+              setCollectionOpen(true)
+            }
+          >
+            <FolderPlus size={15} />
+            Add to Collection
+          </button>
+
+          <button
+            type="button"
             className="document-preview__delete"
             onClick={() => onDelete?.(document)}
           >
@@ -214,7 +241,18 @@ const DocumentPreviewModal = ({
           {statusClass}
         </span>
       </div>
-    </Modal>
+      </Modal>
+
+      <AddToCollectionModal
+        open={collectionOpen}
+        mode="resource"
+        resourceType="document"
+        resourceId={document._id}
+        resourceLabel={document.title}
+        onClose={() => setCollectionOpen(false)}
+        onAdded={onAddedToCollection}
+      />
+    </>
   );
 };
 

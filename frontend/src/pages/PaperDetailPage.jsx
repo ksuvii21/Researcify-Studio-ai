@@ -3,6 +3,7 @@ import {
   CalendarDays,
   ExternalLink,
   FileText,
+  FolderPlus,
   Link2,
   Pencil,
   Pin,
@@ -16,6 +17,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import AddPaperToProjectModal from "../components/projects/AddPaperToProjectModal";
+import AddToCollectionModal from "../components/collections/AddToCollectionModal";
 import NoteFormModal from "../components/notes/NoteFormModal";
 
 import usePaper from "../hooks/usePaper";
@@ -32,6 +34,8 @@ const PaperDetailPage = () => {
   const toast = useToast();
 
   const [addOpen, setAddOpen] = useState(false);
+
+  const [collectionOpen, setCollectionOpen] = useState(false);
 
   const [noteFormOpen, setNoteFormOpen] = useState(false);
 
@@ -123,6 +127,30 @@ const PaperDetailPage = () => {
     toast.success(
       "Paper added",
       `"${paper.title}" was attached to the project.`
+    );
+  };
+
+  /*
+   * The paper is the resource here, so the modal only
+   * asks for the destination collection. It reuses the same
+   * relationship endpoint the Collection Detail page uses.
+   */
+  const handleAddedToCollection = ({
+    collectionName,
+    alreadyExisted,
+  }) => {
+    if (alreadyExisted) {
+      toast.info(
+        "Already in collection",
+        `"${paper.title}" is already in "${collectionName}".`
+      );
+
+      return;
+    }
+
+    toast.success(
+      "Added to collection",
+      `"${paper.title}" was added to "${collectionName}".`
     );
   };
 
@@ -289,6 +317,16 @@ const PaperDetailPage = () => {
             >
               <Link2 size={15} />
               Add to Project
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setCollectionOpen(true)
+              }
+            >
+              <FolderPlus size={15} />
+              Add to Collection
             </button>
 
             {paper.url && (
@@ -488,6 +526,16 @@ const PaperDetailPage = () => {
         paper={paper}
         onClose={() => setAddOpen(false)}
         onAddToProject={handleAddToProject}
+      />
+
+      <AddToCollectionModal
+        open={collectionOpen}
+        mode="resource"
+        resourceType="paper"
+        resourceId={paper._id}
+        resourceLabel={paper.title}
+        onClose={() => setCollectionOpen(false)}
+        onAdded={handleAddedToCollection}
       />
 
       <NoteFormModal

@@ -12,6 +12,8 @@ const CollectionsToolbar = ({
   view,
   setView,
   count,
+  activeTab,
+  setActiveTab,
 }) => {
   return (
     <section className="collections-toolbar">
@@ -29,9 +31,24 @@ const CollectionsToolbar = ({
       </div>
 
       <div className="collections-toolbar__right">
-        <span>
-          {count} collections
-        </span>
+        <div className="collections-tabs">
+          {[
+            ["all", "All"],
+            ["pinned", "Pinned"],
+            ["archived", "Archived"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={activeTab === value ? "active" : ""}
+              onClick={() => setActiveTab(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <span>{count} collections</span>
 
         <select
           value={sort}
@@ -39,7 +56,7 @@ const CollectionsToolbar = ({
             setSort(event.target.value)
           }
         >
-          <option value="updated">
+          <option value="updatedAt">
             Recently Updated
           </option>
 
@@ -56,9 +73,7 @@ const CollectionsToolbar = ({
           <button
             type="button"
             className={
-              view === "grid"
-                ? "active"
-                : ""
+              view === "grid" ? "active" : ""
             }
             onClick={() =>
               setView("grid")
@@ -70,9 +85,7 @@ const CollectionsToolbar = ({
           <button
             type="button"
             className={
-              view === "list"
-                ? "active"
-                : ""
+              view === "list" ? "active" : ""
             }
             onClick={() =>
               setView("list")

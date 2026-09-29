@@ -6,7 +6,6 @@ import {
 } from "react";
 
 import { useNavigate } from "react-router-dom";
-import useToast from "../hooks/useToast";
 
 export const CreateActionContext =
   createContext(null);
@@ -15,7 +14,6 @@ export const CreateActionProvider = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const toast = useToast();
 
   const [activeAction, setActiveAction] =
     useState(null);
@@ -45,10 +43,7 @@ export const CreateActionProvider = ({
           break;
 
         case "collection":
-          toast.info(
-            "Collections",
-            "Collection creation will be available in the Library workspace."
-          );
+          setActiveAction("collection");
           break;
 
         case "search":
@@ -65,7 +60,7 @@ export const CreateActionProvider = ({
           );
       }
     },
-    [navigate, toast]
+    [navigate]
   );
 
   const value = useMemo(

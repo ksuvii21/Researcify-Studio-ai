@@ -981,6 +981,253 @@ button.primary {
   color: #eae0d5;
 }
 
+/* ADD-TO-COLLECTION TARGET STATE */
+
+/*
+ * A relation-option that already contains the resource.
+ * It stays visible (so the user can see where the paper
+ * or document already lives) but is not selectable.
+ */
+.relation-option--added {
+  opacity: 0.62;
+
+  cursor: not-allowed;
+}
+
+.relation-option--added:hover {
+  border-color: var(--border);
+
+  background: var(--surface-alt);
+}
+
+.collection-target-state {
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+
+  flex-shrink: 0;
+
+  align-self: center;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.relation-option--added
+.collection-target-state {
+  color: var(--accent);
+}
+
+.relation-option--selected
+.collection-target-state {
+  color: var(--accent);
+}
+
+/* ITEM TYPE SECTIONS (Collection Detail) */
+
+.collection-section {
+  margin-top: 26px;
+}
+
+.collection-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+.collection-section__header h2 {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.collection-section__header button {
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 0 11px;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  background: var(--surface);
+
+  color: var(--text-soft);
+
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.collection-section__header button:hover {
+  border-color: var(--accent);
+
+  color: var(--accent);
+}
+
+.collection-section__header
+button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+.collection-section__header
+button:disabled:hover {
+  border-color: var(--border);
+
+  color: var(--text-soft);
+}
+
+.collection-summary {
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 16px;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+}
+
+.collection-summary strong {
+  color: var(--text);
+}
+
+.collection-summary__dot {
+  color: var(--border-strong);
+}
+
+/* DETAIL HEADER META */
+
+.collection-detail-updated {
+  margin-top: 8px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+}
+
+/* ITEM REMOVE */
+
+.collection-item-card__actions
+button.danger:hover {
+  border-color: var(--accent);
+
+  color: var(--accent);
+}
+
+/*
+ * The paper title is the primary action on its row, so it
+ * is a real link-like button rather than plain text.
+ */
+.collection-item-link {
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: var(--text);
+
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+
+  text-align: left;
+}
+
+.collection-item-link:hover {
+  color: var(--accent);
+}
+
+/* DETAIL TITLE PIN */
+
+.collection-detail-title h1 {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.collection-detail-title h1 .collection-pin {
+  flex-shrink: 0;
+}
+
+.collection-detail-header
+.collection-detail-title > span {
+  margin-top: 0;
+}
+
+/* EMPTY COLLECTION ACTIONS */
+
+.collection-empty-actions {
+  display: flex;
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 18px;
+}
+
+.collection-empty-actions button {
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 0 13px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.collection-empty-actions button {
+  color: #eae0d5;
+}
+
+.collection-card__top
+button.danger:hover {
+  background: var(--surface-hover);
+
+  color: var(--accent);
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 1150px) {

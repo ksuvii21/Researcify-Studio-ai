@@ -1,32 +1,30 @@
 import {
+  Archive,
   FileText,
   FolderOpen,
-  MoreHorizontal,
-  NotebookPen,
   Pin,
   ScrollText,
+  Trash2,
 } from "lucide-react";
 
+/*
+ * Counts come straight from the API's paperCount and
+ * documentCount fields rather than being derived from a
+ * nested item list. There are deliberately no reading
+ * progress, collaborator or research score values: none of
+ * those exist in the Collection schema, so rendering them
+ * would mean inventing data.
+ */
 const CollectionCard = ({
   collection,
   view,
   onOpen,
   onTogglePin,
+  onDelete,
 }) => {
-  const paperCount =
-    collection.items.filter(
-      (item) => item.type === "paper"
-    ).length;
-
-  const documentCount =
-    collection.items.filter(
-      (item) => item.type === "document"
-    ).length;
-
-  const noteCount =
-    collection.items.filter(
-      (item) => item.type === "note"
-    ).length;
+  const hasItems =
+    collection.paperCount > 0 ||
+    collection.documentCount > 0;
 
   return (
     <article
@@ -45,9 +43,7 @@ const CollectionCard = ({
           <button
             type="button"
             className={`collection-pin ${
-              collection.pinned
-                ? "active"
-                : ""
+              collection.pinned ? "active" : ""
             }`}
             onClick={() =>
               onTogglePin(collection.id)
@@ -57,54 +53,68 @@ const CollectionCard = ({
                 ? "Unpin collection"
                 : "Pin collection"
             }
+            aria-label={
+              collection.pinned
+                ? "Unpin collection"
+                : "Pin collection"
+            }
           >
             <Pin size={16} />
           </button>
 
+          {/*
+           * Delete removes only the container. The
+           * confirmation states that explicitly, because
+           * the papers and documents inside are untouched.
+           */}
           <button
             type="button"
-            className="collection-more"
+            className="collection-more danger"
+            onClick={() => onDelete(collection)}
+            title="Delete collection"
+            aria-label="Delete collection"
           >
-            <MoreHorizontal size={18} />
+            <Trash2 size={16} />
           </button>
         </div>
       </div>
 
       <div className="collection-card__content">
         <span className="collection-card__label">
-          Research Collection
+          {collection.archived
+            ? "Archived"
+            : "Research Collection"}
         </span>
 
         <h2>{collection.name}</h2>
 
         <p>
-          {collection.description}
+          {collection.description ||
+            "No description for this collection."}
         </p>
 
         <div className="collection-card__items">
-          <span>
-            <ScrollText size={14} />
-            {paperCount} papers
-          </span>
-
-          <span>
-            <FileText size={14} />
-            {documentCount} documents
-          </span>
-
-          <span>
-            <NotebookPen size={14} />
-            {noteCount} notes
-          </span>
-        </div>
-
-        <div className="collection-card__tags">
-          {collection.tags.map(
-            (tag) => (
-              <span key={tag}>
-                {tag}
+          {hasItems ? (
+            <>
+              <span>
+                <ScrollText size={14} />
+                {collection.paperCount} paper
+                {collection.paperCount === 1 ? "" : "s"}
               </span>
-            )
+
+              <span>
+                <FileText size={14} />
+                {collection.documentCount} document
+                {collection.documentCount === 1
+                  ? ""
+                  : "s"}
+              </span>
+            </>
+          ) : (
+            <span>
+              <Archive size={14} />
+              Empty collection
+            </span>
           )}
         </div>
       </div>
@@ -116,9 +126,7 @@ const CollectionCard = ({
 
         <button
           type="button"
-          onClick={() =>
-            onOpen(collection.id)
-          }
+          onClick={() => onOpen(collection.id)}
         >
           Open Collection
         </button>

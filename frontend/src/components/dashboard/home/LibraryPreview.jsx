@@ -19,11 +19,14 @@ import {
 } from "../../../utils/fileFormat";
 
 /*
- * Tabs are labels only for now:
+ * Tabs map to real records:
  *  - Favorites / Recent map to real papers
  *  - Uploaded maps to real documents
- *  - Collections belongs to Phase 8E and has no model
- *    yet, so it is not rendered rather than faked.
+ *
+ * Collections is a real domain too, but it has its own
+ * workspace at /collections, so it is not duplicated
+ * here. The dashboard stays at five cards rather than
+ * growing a KPI for every new domain.
  */
 const tabs = [
   {

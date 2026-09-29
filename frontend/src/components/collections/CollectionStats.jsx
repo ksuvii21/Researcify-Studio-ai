@@ -1,28 +1,21 @@
 import {
   FileText,
   FolderOpen,
-  NotebookPen,
   ScrollText,
 } from "lucide-react";
 
 const CollectionStats = ({
   collections,
 }) => {
-  const items = collections.flatMap(
-    (collection) => collection.items
+  const totalPapers = collections.reduce(
+    (sum, c) => sum + (c.paperCount || 0),
+    0
   );
 
-  const papers = items.filter(
-    (item) => item.type === "paper"
-  ).length;
-
-  const documents = items.filter(
-    (item) => item.type === "document"
-  ).length;
-
-  const notes = items.filter(
-    (item) => item.type === "note"
-  ).length;
+  const totalDocuments = collections.reduce(
+    (sum, c) => sum + (c.documentCount || 0),
+    0
+  );
 
   const stats = [
     {
@@ -32,18 +25,13 @@ const CollectionStats = ({
     },
     {
       label: "Research Papers",
-      value: papers,
+      value: totalPapers,
       icon: ScrollText,
     },
     {
       label: "Documents",
-      value: documents,
+      value: totalDocuments,
       icon: FileText,
-    },
-    {
-      label: "Research Notes",
-      value: notes,
-      icon: NotebookPen,
     },
   ];
 

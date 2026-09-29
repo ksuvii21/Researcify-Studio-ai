@@ -7,6 +7,7 @@ const UploadedDocument = require("../models/UploadedDocument");
 const ResearchProject = require("../models/ResearchProject");
 const RecordChunk = require("../models/RecordChunk");
 const Note = require("../models/Note");
+const Collection = require("../models/Collection");
 
 const ApiError = require("../utils/ApiError");
 
@@ -371,6 +372,25 @@ const deleteDocument = async (userId, documentId) => {
   await RecordChunk.deleteMany({
     documentId: document._id,
   });
+
+  /*
+   * Remove the document from every collection that
+   * references it, otherwise Collection.documentIds
+   * would keep dangling ids pointing at a deleted
+   * document. The collection itself survives: it is only
+   * organization.
+   */
+  await Collection.updateMany(
+    {
+      userId,
+      documentIds: document._id,
+    },
+    {
+      $pull: {
+        documentIds: document._id,
+      },
+    }
+  );
 
   /*
    * Notes are user-authored content, so they survive

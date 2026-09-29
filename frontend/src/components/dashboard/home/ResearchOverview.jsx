@@ -56,17 +56,12 @@ const ResearchOverview = () => {
   } = useDashboardNotes();
 
   /*
-   * Projects and Papers are real (Phases 8A / 8B).
+   * Projects, Papers, Notes and Documents all read real
+   * records (Phases 8A / 8B / 8C / 8D).
    *
-   * Notes, Documents, Collections and AI are not
-   * integrated yet, so they show an em dash rather
-   * than a Phase 7 sample number that could be
-   * mistaken for real data.
-   *
-   * Notes     -> Phase 8C
-   * Documents -> Phase 8D
-   * Activity  -> Phase 8F
-   * AI        -> Phase 8G
+   * AI Conversations is not connected yet, so it shows an
+   * em dash rather than a sample number that could be
+   * mistaken for real data. AI lands in 8G.
    */
   const stats = [
     {

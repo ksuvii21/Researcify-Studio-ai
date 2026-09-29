@@ -179,9 +179,36 @@ const UploadsPage = () => {
     }
   };
 
+  // ---------------------------------------------------
+  // Collections
+  // ---------------------------------------------------
+
+  /*
+   * The document itself is never mutated by a collection
+   * change, so only a confirmation is needed here. The
+   * Collections list refreshes on its own next mount.
+   */
+  const handleAddedToCollection = ({
+    collectionName,
+    alreadyExisted,
+  }) => {
+    if (alreadyExisted) {
+      toast.info(
+        "Already in collection",
+        `This document is already in "${collectionName}".`
+      );
+
+      return;
+    }
+
+    toast.success(
+      "Added to collection",
+      `The document was added to "${collectionName}".`
+    );
+  };
+
   const isLibraryEmpty =
     !query.trim() && !status && !projectId;
-
   return (
     <div className="uploads-page">
       <UploadsHeader
@@ -244,6 +271,7 @@ const UploadsPage = () => {
         }
         onClose={() => setPreviewDocument(null)}
         onDownload={handleDownload}
+        onAddedToCollection={handleAddedToCollection}
         onEdit={(document) => {
           setPreviewDocument(null);
           setEditDocument(document);

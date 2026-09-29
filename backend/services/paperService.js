@@ -1,6 +1,7 @@
 const Paper = require("../models/Paper");
 const ResearchProject = require("../models/ResearchProject");
 const Note = require("../models/Note");
+const Collection = require("../models/Collection");
 const ApiError = require("../utils/ApiError");
 
 // -----------------------------------------------------
@@ -260,6 +261,24 @@ const deletePaper = async (userId, paperId) => {
    * paper.
    */
   await ResearchProject.updateMany(
+    {
+      userId,
+      paperIds: paper._id,
+    },
+    {
+      $pull: {
+        paperIds: paper._id,
+      },
+    }
+  );
+
+  /*
+   * Remove the paper from every collection that
+   * references it, otherwise Collection.paperIds would
+   * keep dangling ids pointing at a deleted paper. The
+   * collection itself survives: it is only organization.
+   */
+  await Collection.updateMany(
     {
       userId,
       paperIds: paper._id,
