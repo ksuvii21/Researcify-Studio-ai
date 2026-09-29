@@ -9,6 +9,8 @@ import {
   Quote,
 } from "lucide-react";
 
+import { useState } from "react";
+
 const toolbar = [
   {
     label: "Heading",
@@ -49,11 +51,31 @@ const NoteEditor = ({
   setTitle,
   content,
   setContent,
+  tags = [],
+  setTags,
 }) => {
+  const [tagDraft, setTagDraft] = useState("");
+
   const wordCount = content
     .trim()
     .split(/\s+/)
     .filter(Boolean).length;
+
+  const addTag = () => {
+    const value = tagDraft.trim();
+
+    if (!value || tags.includes(value)) {
+      setTagDraft("");
+      return;
+    }
+
+    setTags([...tags, value]);
+    setTagDraft("");
+  };
+
+  const removeTag = (tag) => {
+    setTags(tags.filter((item) => item !== tag));
+  };
 
   return (
     <main className="note-editor">
@@ -81,6 +103,38 @@ const NoteEditor = ({
         )}
       </div>
 
+      <div className="note-editor__tags">
+        {tags.map((tag) => (
+          <span key={tag}>
+            {tag}
+
+            <button
+              type="button"
+              aria-label={`Remove tag ${tag}`}
+              onClick={() => removeTag(tag)}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+
+        <input
+          className="note-editor__tag-input"
+          value={tagDraft}
+          onChange={(event) =>
+            setTagDraft(event.target.value)
+          }
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              addTag();
+            }
+          }}
+          onBlur={addTag}
+          placeholder="Add a tag..."
+        />
+      </div>
+
       <textarea
         className="note-editor__content"
         value={content}
@@ -99,7 +153,7 @@ const NoteEditor = ({
         </span>
 
         <span>
-          Research note
+          Changes save automatically
         </span>
       </footer>
     </main>

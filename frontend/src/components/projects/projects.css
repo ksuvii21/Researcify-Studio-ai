@@ -1445,6 +1445,66 @@
   line-height: 1.6;
 }
 
+.project-note-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  margin-top: 10px;
+}
+
+.project-note-card__tags span {
+  padding: 3px 7px;
+
+  border-radius: 999px;
+
+  background: var(--surface-hover);
+
+  color: var(--text-muted);
+
+  font-size: 9px;
+}
+
+.project-note-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  margin-top: 12px;
+  padding-top: 11px;
+
+  border-top: 1px solid var(--border);
+}
+
+.project-note-card__actions button {
+  min-height: 30px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 0 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 7px;
+
+  background: var(--surface);
+
+  color: var(--text-soft);
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.project-note-card__actions button.danger {
+  color: var(--danger);
+}
+
 .project-note-card small {
   display: block;
 

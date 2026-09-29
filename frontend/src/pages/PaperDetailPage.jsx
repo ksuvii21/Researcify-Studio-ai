@@ -4,7 +4,11 @@ import {
   ExternalLink,
   FileText,
   Link2,
+  Pencil,
+  Pin,
+  Plus,
   Star,
+  Trash2,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -12,8 +16,10 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 import AddPaperToProjectModal from "../components/projects/AddPaperToProjectModal";
+import NoteFormModal from "../components/notes/NoteFormModal";
 
 import usePaper from "../hooks/usePaper";
+import useNotes from "../hooks/useNotes";
 import useToast from "../hooks/useToast";
 
 import { addPaperToProject } from "../api/projectApi";
@@ -27,6 +33,10 @@ const PaperDetailPage = () => {
 
   const [addOpen, setAddOpen] = useState(false);
 
+  const [noteFormOpen, setNoteFormOpen] = useState(false);
+
+  const [editingNote, setEditingNote] = useState(null);
+
   const {
     paper,
     loading,
@@ -34,6 +44,21 @@ const PaperDetailPage = () => {
     refetch,
     toggleFavorite,
   } = usePaper(id);
+
+  const {
+    notes: paperNotes,
+    loading: notesLoading,
+    error: notesError,
+    mutationLoading: noteMutationLoading,
+    fetchNotes,
+    createNote,
+    updateNote,
+    deleteNote,
+    togglePin,
+  } = useNotes({
+    paperId: paper?._id || "",
+    autoFetch: Boolean(paper?._id),
+  });
 
   if (loading) {
     return (
@@ -99,6 +124,81 @@ const PaperDetailPage = () => {
       "Paper added",
       `"${paper.title}" was attached to the project.`
     );
+  };
+
+  // ---------------------------------------------------
+  // Paper notes
+  // ---------------------------------------------------
+
+  const handleAddNote = () => {
+    setEditingNote(null);
+    setNoteFormOpen(true);
+  };
+
+  const handleEditNote = (note) => {
+    setEditingNote(note);
+    setNoteFormOpen(true);
+  };
+
+  const handleCloseNoteForm = () => {
+    setNoteFormOpen(false);
+    setEditingNote(null);
+  };
+
+  const handleNoteSubmit = async (values) => {
+    if (editingNote?._id) {
+      await updateNote(editingNote._id, values);
+
+      toast.success("Note updated", values.title);
+    } else {
+      /*
+       * The paper is bound automatically, so the user
+       * is never asked to pick the paper they are
+       * already looking at.
+       */
+      await createNote({
+        ...values,
+        paperId: paper._id,
+      });
+
+      toast.success("Note created", values.title);
+    }
+
+    handleCloseNoteForm();
+  };
+
+  const handleDeleteNote = async (note) => {
+    const confirmed = window.confirm(
+      `Delete "${note.title}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteNote(note._id);
+
+      toast.success("Note deleted", note.title);
+    } catch (err) {
+      console.error("[PaperNotes] Delete error:", err);
+
+      toast.error(
+        "Delete failed",
+        err?.message || "Unable to delete this note."
+      );
+    }
+  };
+
+  const handlePinNote = async (note) => {
+    try {
+      await togglePin(note._id);
+    } catch (err) {
+      console.error("[PaperNotes] Pin error:", err);
+
+      toast.error(
+        "Could not update pin",
+        err?.message || "Please try again."
+      );
+    }
   };
 
   const infoRows = [
@@ -272,12 +372,131 @@ const PaperDetailPage = () => {
         </article>
       </div>
 
+      <section className="paper-detail-notes">
+        <div className="project-section__header">
+          <div>
+            <h2>My Notes</h2>
+            <p>
+              Observations and findings while
+              reviewing this paper.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAddNote}
+            disabled={notesLoading}
+          >
+            <Plus size={15} />
+            Add Note
+          </button>
+        </div>
+
+        {notesLoading ? (
+          <div className="project-relation-state">
+            <p>Loading notes...</p>
+          </div>
+        ) : notesError ? (
+          <div className="project-relation-state project-relation-state--error">
+            <p>{notesError}</p>
+
+            <button type="button" onClick={fetchNotes}>
+              Try Again
+            </button>
+          </div>
+        ) : paperNotes.length === 0 ? (
+          <div className="project-relation-state">
+            <h3>No notes for this paper yet</h3>
+
+            <p>
+              Capture observations, findings and ideas
+              while reviewing this research paper.
+            </p>
+
+            <button type="button" onClick={handleAddNote}>
+              Add Note
+            </button>
+          </div>
+        ) : (
+          <div className="paper-notes-list">
+            {paperNotes.map((note) => (
+              <article
+                key={note._id}
+                className="paper-note"
+              >
+                <div className="paper-note__top">
+                  <h3>
+                    {note.isPinned && (
+                      <Pin size={13} />
+                    )}
+                    {note.title}
+                  </h3>
+
+                  <div className="paper-note__actions">
+                    <button
+                      type="button"
+                      aria-label="Edit note"
+                      onClick={() => handleEditNote(note)}
+                    >
+                      <Pencil size={14} />
+                    </button>
+
+                    <button
+                      type="button"
+                      aria-label="Pin note"
+                      className={
+                        note.isPinned ? "active" : ""
+                      }
+                      onClick={() => handlePinNote(note)}
+                    >
+                      <Pin size={14} />
+                    </button>
+
+                    <button
+                      type="button"
+                      aria-label="Delete note"
+                      className="danger"
+                      onClick={() => handleDeleteNote(note)}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                <p>
+                  {note.content
+                    ? `${note.content.slice(0, 180)}${
+                        note.content.length > 180
+                          ? "…"
+                          : ""
+                      }`
+                    : "No content yet."}
+                </p>
+
+                <small>
+                  Updated {formatDate(note.updatedAt)}
+                </small>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
       <AddPaperToProjectModal
         open={addOpen}
         mode="project"
         paper={paper}
         onClose={() => setAddOpen(false)}
         onAddToProject={handleAddToProject}
+      />
+
+      <NoteFormModal
+        open={noteFormOpen}
+        note={editingNote}
+        defaultPaperId={paper._id}
+        loading={noteMutationLoading}
+        onClose={handleCloseNoteForm}
+        onSubmit={handleNoteSubmit}
       />
     </div>
   );

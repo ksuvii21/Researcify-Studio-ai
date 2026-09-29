@@ -8,6 +8,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const paperRoutes = require("./routes/paperRoutes");
 const projectRoutes = require("./routes/projectRoutes");
+const noteRoutes = require("./routes/noteRoutes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -70,6 +71,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1", paperRoutes);
 
 app.use("/api/v1/projects", projectRoutes);
+
+app.use("/api/v1/notes", noteRoutes);
 
 // ================================
 // 404 HANDLER

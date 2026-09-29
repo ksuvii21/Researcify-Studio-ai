@@ -10,6 +10,7 @@ import {
 const ProjectOverview = ({
   project,
   paperCount,
+  noteCount,
 }) => {
   /*
    * Only papers and documents are backed by real
@@ -46,7 +47,8 @@ const ProjectOverview = ({
     },
     {
       label: "Research Notes",
-      value: "—",
+      value:
+        typeof noteCount === "number" ? noteCount : "—",
       icon: NotebookPen,
     },
     {

@@ -1,17 +1,19 @@
 import {
   FolderKanban,
-  Heart,
   NotebookPen,
+  Pin,
   Tags,
 } from "lucide-react";
 
 const NotesStats = ({ notes }) => {
   const uniqueProjects = new Set(
-    notes.map((note) => note.project)
+    notes
+      .map((note) => note.projectId)
+      .filter(Boolean)
   ).size;
 
   const uniqueTags = new Set(
-    notes.flatMap((note) => note.tags)
+    notes.flatMap((note) => note.tags || [])
   ).size;
 
   const stats = [
@@ -21,10 +23,10 @@ const NotesStats = ({ notes }) => {
       icon: NotebookPen,
     },
     {
-      label: "Favorites",
-      value: notes.filter((note) => note.favorite)
+      label: "Pinned",
+      value: notes.filter((note) => note.isPinned)
         .length,
-      icon: Heart,
+      icon: Pin,
     },
     {
       label: "Linked Projects",

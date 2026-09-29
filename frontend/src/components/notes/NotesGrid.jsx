@@ -5,9 +5,31 @@ import NoteCard from "./NoteCard";
 const NotesGrid = ({
   notes,
   view,
-  onFavorite,
+  onPin,
+  onArchive,
+  onEdit,
+  onDelete,
+  isNotesEmpty,
+  onClearFilters,
 }) => {
   if (!notes.length) {
+    // Truly empty workspace vs. filters hid everything.
+    if (isNotesEmpty) {
+      return (
+        <div className="notes-empty">
+          <NotebookPen size={35} />
+
+          <h2>Your notes workspace is empty</h2>
+
+          <p>
+            Capture ideas, synthesize findings
+            and connect your thinking with papers
+            and research projects.
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="notes-empty">
         <NotebookPen size={35} />
@@ -16,8 +38,15 @@ const NotesGrid = ({
 
         <p>
           Try changing your search or selected
-          project filter.
+          filters.
         </p>
+
+        <button
+          type="button"
+          onClick={onClearFilters}
+        >
+          Clear filters
+        </button>
       </div>
     );
   }
@@ -32,10 +61,13 @@ const NotesGrid = ({
     >
       {notes.map((note) => (
         <NoteCard
-          key={note.id}
+          key={note._id}
           note={note}
           view={view}
-          onFavorite={onFavorite}
+          onPin={onPin}
+          onArchive={onArchive}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
       ))}
     </section>

@@ -1,11 +1,29 @@
 import {
   FileText,
   FolderKanban,
-  Plus,
   Tag,
 } from "lucide-react";
 
 const NoteSidebar = ({ note }) => {
+  const formatDate = (value) =>
+    value
+      ? new Date(value).toLocaleDateString(undefined, {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
+      : "—";
+
+  /*
+   * Relationships arrive populated as objects
+   * ({ _id, title }), or null when unlinked.
+   */
+  const projectTitle =
+    note.projectId?.title || null;
+
+  const paperTitle =
+    note.paperId?.title || null;
+
   return (
     <aside className="note-context-sidebar">
       <section>
@@ -15,10 +33,16 @@ const NoteSidebar = ({ note }) => {
           <h3>Research Project</h3>
         </div>
 
-        <div className="note-project-link">
-          <span>Linked project</span>
-          <strong>{note.project}</strong>
-        </div>
+        {projectTitle ? (
+          <div className="note-project-link">
+            <span>Linked project</span>
+            <strong>{projectTitle}</strong>
+          </div>
+        ) : (
+          <p className="note-context-empty">
+            This note is not linked to a project.
+          </p>
+        )}
       </section>
 
       <section>
@@ -27,54 +51,39 @@ const NoteSidebar = ({ note }) => {
           <h3>Tags</h3>
         </div>
 
-        <div className="note-context-tags">
-          {note.tags.map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
-
-          <button type="button">
-            <Plus size={12} />
-          </button>
-        </div>
+        {note.tags?.length ? (
+          <div className="note-context-tags">
+            {note.tags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+        ) : (
+          <p className="note-context-empty">
+            No tags on this note.
+          </p>
+        )}
       </section>
 
       <section>
         <div className="note-context-heading">
           <FileText size={16} />
 
-          <h3>Linked Papers</h3>
+          <h3>Linked Paper</h3>
         </div>
 
-        {note.linkedPapers.length ? (
+        {paperTitle ? (
           <div className="note-linked-papers">
-            {note.linkedPapers.map(
-              (paper) => (
-                <button
-                  type="button"
-                  key={paper.id}
-                >
-                  <FileText size={15} />
+            <button type="button">
+              <FileText size={15} />
 
-                  <span>
-                    {paper.title}
-                  </span>
-                </button>
-              )
-            )}
+              <span>{paperTitle}</span>
+            </button>
           </div>
         ) : (
           <p className="note-context-empty">
-            No papers linked to this note.
+            No paper linked to this note.
           </p>
         )}
-
-        <button
-          type="button"
-          className="note-context-add"
-        >
-          <Plus size={14} />
-          Link Paper
-        </button>
       </section>
 
       <section>
@@ -85,12 +94,30 @@ const NoteSidebar = ({ note }) => {
         <div className="note-information">
           <div>
             <span>Created</span>
-            <strong>{note.created}</strong>
+            <strong>
+              {formatDate(note.createdAt)}
+            </strong>
           </div>
 
           <div>
             <span>Updated</span>
-            <strong>{note.updated}</strong>
+            <strong>
+              {formatDate(note.updatedAt)}
+            </strong>
+          </div>
+
+          <div>
+            <span>Pinned</span>
+            <strong>
+              {note.isPinned ? "Yes" : "No"}
+            </strong>
+          </div>
+
+          <div>
+            <span>Archived</span>
+            <strong>
+              {note.isArchived ? "Yes" : "No"}
+            </strong>
           </div>
         </div>
       </section>

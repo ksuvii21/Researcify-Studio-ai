@@ -1,5 +1,6 @@
 const ResearchProject = require("../models/ResearchProject");
 const Paper = require("../models/Paper");
+const Note = require("../models/Note");
 const ApiError = require("../utils/ApiError");
 
 // -----------------------------------------------------
@@ -183,6 +184,23 @@ const deleteProject = async (userId, projectId) => {
   if (!project) {
     throw new ApiError(404, "Project not found.");
   }
+
+  /*
+   * Notes are user-authored content, so they are never
+   * deleted along with a project. Only the reference is
+   * cleared, leaving the note intact as a general note.
+   */
+  await Note.updateMany(
+    {
+      userId,
+      projectId: project._id,
+    },
+    {
+      $set: {
+        projectId: null,
+      },
+    }
+  );
 
   await project.deleteOne();
 

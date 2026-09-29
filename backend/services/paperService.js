@@ -1,5 +1,6 @@
 const Paper = require("../models/Paper");
 const ResearchProject = require("../models/ResearchProject");
+const Note = require("../models/Note");
 const ApiError = require("../utils/ApiError");
 
 // -----------------------------------------------------
@@ -266,6 +267,23 @@ const deletePaper = async (userId, paperId) => {
     {
       $pull: {
         paperIds: paper._id,
+      },
+    }
+  );
+
+  /*
+   * Notes are user-authored content, so they are never
+   * deleted along with a paper. Only the reference is
+   * cleared, leaving the note intact.
+   */
+  await Note.updateMany(
+    {
+      userId,
+      paperId: paper._id,
+    },
+    {
+      $set: {
+        paperId: null,
       },
     }
   );

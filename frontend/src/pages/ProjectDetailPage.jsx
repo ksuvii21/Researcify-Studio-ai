@@ -25,9 +25,11 @@ import ProjectQuestions from "../components/projects/ProjectQuestions";
 import ProjectAI from "../components/projects/ProjectAI";
 import ProjectActivity from "../components/projects/ProjectActivity";
 import AddPaperToProjectModal from "../components/projects/AddPaperToProjectModal";
+import NoteFormModal from "../components/notes/NoteFormModal";
 
 import useProject from "../hooks/useProject";
 import useProjectPapers from "../hooks/useProjectPapers";
+import useNotes from "../hooks/useNotes";
 import useToast from "../hooks/useToast";
 
 import "../components/projects/projects.css";
@@ -81,6 +83,12 @@ const ProjectDetailPage = () => {
   const [addPaperOpen, setAddPaperOpen] =
     useState(false);
 
+  const [noteFormOpen, setNoteFormOpen] =
+    useState(false);
+
+  const [editingNote, setEditingNote] =
+    useState(null);
+
   const {
     project,
     loading,
@@ -96,6 +104,69 @@ const ProjectDetailPage = () => {
     removePaper,
     fetchPapers,
   } = useProjectPapers(project?._id);
+
+  const {
+    notes: projectNotes,
+    loading: notesLoading,
+    error: notesError,
+    mutationLoading: noteMutationLoading,
+    fetchNotes,
+    createNote,
+    updateNote,
+    deleteNote,
+  } = useNotes({
+    projectId: project?._id || "",
+    autoFetch: Boolean(project?._id),
+  });
+
+  // ---------------------------------------------------
+  // Project notes
+  // ---------------------------------------------------
+
+  const handleAddNote = () => {
+    setEditingNote(null);
+    setNoteFormOpen(true);
+  };
+
+  const handleCloseNoteForm = () => {
+    setNoteFormOpen(false);
+    setEditingNote(null);
+  };
+
+  const handleNoteSubmit = async (values) => {
+    if (editingNote?._id) {
+      await updateNote(editingNote._id, values);
+
+      toast.success("Note updated", values.title);
+    } else {
+      await createNote(values);
+
+      toast.success("Note created", values.title);
+    }
+
+    handleCloseNoteForm();
+  };
+
+  const handleDeleteNote = async (note) => {
+    const confirmed = window.confirm(
+      `Delete "${note.title}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteNote(note._id);
+
+      toast.success("Note deleted", note.title);
+    } catch (err) {
+      console.error("[ProjectNotes] Delete error:", err);
+
+      toast.error(
+        "Delete failed",
+        err?.message || "Unable to delete this note."
+      );
+    }
+  };
 
   // ---------------------------------------------------
   // Project paper relationship
@@ -186,7 +257,16 @@ const ProjectDetailPage = () => {
         );
 
       case "notes":
-        return <ProjectNotes />;
+        return (
+          <ProjectNotes
+            notes={projectNotes}
+            loading={notesLoading}
+            error={notesError}
+            onAddNote={handleAddNote}
+            onDeleteNote={handleDeleteNote}
+            onRetry={fetchNotes}
+          />
+        );
 
       case "documents":
         return <ProjectDocuments />;
@@ -205,6 +285,7 @@ const ProjectDetailPage = () => {
           <ProjectOverview
             project={project}
             paperCount={projectPapers.length}
+            noteCount={projectNotes.length}
           />
         );
     }
@@ -252,6 +333,15 @@ const ProjectDetailPage = () => {
         projectPapers={projectPapers}
         onClose={() => setAddPaperOpen(false)}
         onAddPaper={handleAddPaper}
+      />
+
+      <NoteFormModal
+        open={noteFormOpen}
+        note={editingNote}
+        lockedProjectId={project._id}
+        loading={noteMutationLoading}
+        onClose={handleCloseNoteForm}
+        onSubmit={handleNoteSubmit}
       />
     </div>
   );

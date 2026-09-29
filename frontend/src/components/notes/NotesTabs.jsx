@@ -1,7 +1,7 @@
 import {
+  Archive,
   Clock3,
   FolderKanban,
-  Heart,
   NotebookPen,
 } from "lucide-react";
 
@@ -12,19 +12,19 @@ const tabs = [
     icon: NotebookPen,
   },
   {
-    id: "favorites",
-    label: "Favorites",
-    icon: Heart,
-  },
-  {
-    id: "recent",
-    label: "Recent",
+    id: "pinned",
+    label: "Pinned",
     icon: Clock3,
   },
   {
     id: "projects",
     label: "Project Notes",
     icon: FolderKanban,
+  },
+  {
+    id: "archived",
+    label: "Archived",
+    icon: Archive,
   },
 ];
 

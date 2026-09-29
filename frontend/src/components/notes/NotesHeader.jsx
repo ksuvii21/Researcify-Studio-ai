@@ -1,14 +1,9 @@
 import {
-  NotebookPen,
   Plus,
   Sparkles,
 } from "lucide-react";
 
-import useCreateAction from "../../hooks/useCreateAction";
-
-const NotesHeader = () => {
-  const { handleAction } = useCreateAction();
-
+const NotesHeader = ({ onCreateNote }) => {
   return (
     <header className="notes-header">
       <div>
@@ -29,7 +24,7 @@ const NotesHeader = () => {
       <button
         type="button"
         className="notes-primary-button"
-        onClick={() => handleAction("note")}
+        onClick={onCreateNote}
       >
         <Plus size={17} />
         New Note

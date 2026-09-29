@@ -4,13 +4,17 @@ import {
   Search,
 } from "lucide-react";
 
-import { noteProjects } from "../../data/notesMockData";
-
+/*
+ * Project filtering is done server-side via
+ * ?projectId=, so the options come from the user's
+ * real projects rather than a hard-coded list.
+ */
 const NotesToolbar = ({
   query,
   setQuery,
-  project,
-  setProject,
+  projectId,
+  setProjectId,
+  projects,
   sort,
   setSort,
   view,
@@ -36,18 +40,19 @@ const NotesToolbar = ({
         <span>{resultCount} notes</span>
 
         <select
-          value={project}
+          value={projectId}
           onChange={(event) =>
-            setProject(event.target.value)
+            setProjectId(event.target.value)
           }
         >
-          <option value="all">
-            All Projects
-          </option>
+          <option value="">All Projects</option>
 
-          {noteProjects.map((item) => (
-            <option key={item} value={item}>
-              {item}
+          {projects.map((project) => (
+            <option
+              key={project._id}
+              value={project._id}
+            >
+              {project.title}
             </option>
           ))}
         </select>
@@ -58,16 +63,16 @@ const NotesToolbar = ({
             setSort(event.target.value)
           }
         >
-          <option value="recent">
+          <option value="updatedAt">
             Recently Updated
+          </option>
+
+          <option value="createdAt">
+            Recently Created
           </option>
 
           <option value="title">
             Title A–Z
-          </option>
-
-          <option value="favorites">
-            Favorites First
           </option>
         </select>
 

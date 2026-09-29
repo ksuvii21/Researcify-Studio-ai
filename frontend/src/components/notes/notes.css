@@ -568,6 +568,308 @@
   font-size: 12px;
 }
 
+.notes-empty button {
+  min-height: 36px;
+
+  margin-top: 15px;
+  padding: 0 13px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.notes-empty button {
+  color: #eae0d5;
+}
+
+/* LOADING / ERROR */
+
+.notes-state {
+  margin-top: 15px;
+  padding: 70px 20px;
+
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+
+  color: var(--text-muted);
+
+  text-align: center;
+}
+
+.notes-state p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.notes-state--error p {
+  color: var(--danger);
+}
+
+.notes-state button {
+  min-height: 36px;
+
+  margin-top: 15px;
+  padding: 0 13px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.notes-state button {
+  color: #eae0d5;
+}
+
+/* CARD MENU */
+
+.note-card__menu-wrap {
+  position: relative;
+}
+
+.note-card__menu-list {
+  position: absolute;
+
+  top: calc(100% + 6px);
+  right: 0;
+
+  z-index: 20;
+
+  min-width: 168px;
+
+  display: grid;
+
+  padding: 5px;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: var(--surface);
+
+  box-shadow: var(--shadow-md);
+}
+
+.note-card__menu-list button {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 9px 10px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: var(--text-soft);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  text-align: left;
+}
+
+.note-card__menu-list button:hover {
+  background: var(--surface-hover);
+
+  color: var(--text);
+}
+
+.note-card__menu-list button.danger {
+  color: var(--danger);
+}
+
+.note-card__pin {
+  margin-right: 4px;
+
+  vertical-align: -1px;
+}
+
+.note-editor-state {
+  margin-top: 20px;
+  padding: 70px 20px;
+
+  border: 1px dashed var(--border);
+  border-radius: 13px;
+
+  color: var(--text-muted);
+
+  text-align: center;
+}
+
+.note-editor-state h2 {
+  color: var(--text-soft);
+
+  font-size: 18px;
+}
+
+.note-editor-state p {
+  margin-top: 6px;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.note-editor-state--error p {
+  color: var(--danger);
+}
+
+.note-editor-state button {
+  min-height: 38px;
+
+  margin-top: 15px;
+  padding: 0 14px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.note-editor-state button {
+  color: #eae0d5;
+}
+
+/* SAVE STATUS */
+
+.note-save-status {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.note-save-status--saved {
+  color: var(--success);
+}
+
+.note-save-status--error {
+  color: var(--danger);
+}
+
+.note-save-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.note-retry-button {
+  min-height: 28px;
+
+  padding: 0 10px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+
+  background: var(--surface-alt);
+
+  color: var(--text-soft);
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.note-editor-header__actions button.danger {
+  color: var(--danger);
+}
+
+/* EDITOR TAGS */
+
+.note-editor__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-top: 12px;
+}
+
+.note-editor__tags > span {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 4px 8px;
+
+  border-radius: 999px;
+
+  background: var(--surface-alt);
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+}
+
+.note-editor__tags > span button {
+  border: 0;
+
+  background: transparent;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+  line-height: 1;
+}
+
+.note-editor__tag-input {
+  min-width: 130px;
+  height: 28px;
+
+  padding: 0 9px;
+
+  border: 1px dashed var(--border);
+  border-radius: 999px;
+
+  outline: none;
+
+  background: transparent;
+
+  color: var(--text);
+
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.note-editor__tag-input:focus {
+  border-color: var(--accent);
+}
+
 /* =========================
    NOTE WORKSPACE HEADER
 ========================= */

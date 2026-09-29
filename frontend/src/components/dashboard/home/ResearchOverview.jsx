@@ -8,6 +8,7 @@ import {
 
 import useDashboardProjects from "../../../hooks/useDashboardProjects";
 import useDashboardPapers from "../../../hooks/useDashboardPapers";
+import useDashboardNotes from "../../../hooks/useDashboardNotes";
 
 const MiniTrend = ({ points }) => {
   const coordinates = points
@@ -48,6 +49,12 @@ const ResearchOverview = () => {
     loading: papersLoading,
   } = useDashboardPapers();
 
+  const {
+    totalNotes,
+    pinnedNotes,
+    loading: notesLoading,
+  } = useDashboardNotes();
+
   /*
    * Projects and Papers are real (Phases 8A / 8B).
    *
@@ -85,8 +92,10 @@ const ResearchOverview = () => {
     },
     {
       label: "Research Notes",
-      value: "—",
-      change: "Not connected yet",
+      value: notesLoading ? "—" : totalNotes,
+      change: notesLoading
+        ? "Loading"
+        : `${pinnedNotes} pinned`,
       icon: NotebookPen,
       trend: [25, 31, 47, 43, 58, 65, 72],
     },
