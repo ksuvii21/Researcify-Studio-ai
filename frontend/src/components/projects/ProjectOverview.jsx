@@ -9,10 +9,11 @@ import {
 
 const ProjectOverview = ({
   project,
+  paperCount,
 }) => {
   /*
    * Only papers and documents are backed by real
-   * data right now (paperIds / documentIds).
+   * data right now.
    *
    * Notes, AI conversations, collections and
    * activity are not integrated yet, so they show
@@ -23,8 +24,16 @@ const ProjectOverview = ({
    * Activity -> Phase 8F
    * AI       -> Phase 8G
    */
-  const paperCount =
-    project.paperIds?.length || 0;
+  /*
+   * Prefer the live count from GET /projects/:id/papers.
+   * project.paperIds.length is only as fresh as the last
+   * project fetch, so it goes stale the moment a paper is
+   * attached or detached without refetching the project.
+   */
+  const papers =
+    typeof paperCount === "number"
+      ? paperCount
+      : project.paperIds?.length || 0;
 
   const documentCount =
     project.documentIds?.length || 0;
@@ -32,7 +41,7 @@ const ProjectOverview = ({
   const stats = [
     {
       label: "Research Papers",
-      value: paperCount,
+      value: papers,
       icon: Files,
     },
     {

@@ -1,7 +1,6 @@
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useState } from "react";
+
+import { useNavigate } from "react-router-dom";
 
 import LibraryHeader from "../components/library/LibraryHeader";
 import LibraryStats from "../components/library/LibraryStats";
@@ -11,151 +10,144 @@ import LibraryPapers from "../components/library/LibraryPapers";
 import LibraryCollections from "../components/library/LibraryCollections";
 import LibraryPaperModal from "../components/library/LibraryPaperModal";
 
-import {
-  libraryPapers as initialPapers,
-} from "../data/libraryMockData";
+import usePapers from "../hooks/usePapers";
+import useToast from "../hooks/useToast";
 
 import "../components/library/library.css";
 
 const LibraryPage = () => {
-  const [papers, setPapers] =
-    useState(initialPapers);
+  const toast = useToast();
 
-  const [activeTab, setActiveTab] =
-    useState("all");
+  const navigate = useNavigate();
 
-  const [query, setQuery] =
-    useState("");
+  const [activeTab, setActiveTab] = useState("all");
 
-  const [year, setYear] =
-    useState("all");
+  const [query, setQuery] = useState("");
 
-  const [type, setType] =
-    useState("all");
+  const [sort, setSort] = useState("createdAt");
 
-  const [sort, setSort] =
-    useState("recent");
-
-  const [view, setView] =
-    useState("grid");
+  const [view, setView] = useState("grid");
 
   const [selectedPaper, setSelectedPaper] =
     useState(null);
 
-  const filteredPapers = useMemo(() => {
-    let result = [...papers];
+  /*
+   * Favorites are filtered server-side so the tab
+   * reflects the whole library, not just the page
+   * currently loaded.
+   */
+  const favoriteFilter =
+    activeTab === "favorites" ? "true" : "";
 
-    if (activeTab === "favorites") {
-      result = result.filter(
-        (paper) => paper.favorite
-      );
-    }
-
-    if (activeTab === "uploaded") {
-      result = result.filter(
-        (paper) =>
-          paper.source === "Uploaded"
-      );
-    }
-
-    if (activeTab === "recent") {
-      result = result.slice(0, 4);
-    }
-
-    const normalizedQuery =
-      query.trim().toLowerCase();
-
-    if (normalizedQuery) {
-      result = result.filter(
-        (paper) =>
-          [
-            paper.title,
-            paper.journal,
-            paper.project,
-            paper.collection,
-            ...paper.authors,
-            ...paper.tags,
-          ]
-            .join(" ")
-            .toLowerCase()
-            .includes(normalizedQuery)
-      );
-    }
-
-    if (year !== "all") {
-      result = result.filter(
-        (paper) =>
-          String(paper.year) === year
-      );
-    }
-
-    if (type !== "all") {
-      result = result.filter(
-        (paper) =>
-          paper.type === type
-      );
-    }
-
-    if (sort === "newest") {
-      result.sort(
-        (a, b) => b.year - a.year
-      );
-    }
-
-    if (sort === "citations") {
-      result.sort(
-        (a, b) =>
-          b.citations - a.citations
-      );
-    }
-
-    if (sort === "title") {
-      result.sort((a, b) =>
-        a.title.localeCompare(b.title)
-      );
-    }
-
-    return result;
-  }, [
+  const {
     papers,
-    activeTab,
-    query,
-    year,
-    type,
+    loading,
+    error,
+    fetchPapers,
+    toggleFavorite,
+    deletePaper,
+  } = usePapers({
+    search: query,
+    favorite: favoriteFilter,
     sort,
-  ]);
+    order: sort === "title" ? "asc" : "desc",
+  });
 
-  const toggleFavorite = (paperId) => {
-    setPapers((current) =>
-      current.map((paper) =>
-        paper.id === paperId
-          ? {
-              ...paper,
-              favorite:
-                !paper.favorite,
-            }
-          : paper
-      )
-    );
+  // ---------------------------------------------------
+  // Favorite
+  // ---------------------------------------------------
 
-    setSelectedPaper((current) =>
-      current?.id === paperId
-        ? {
-            ...current,
-            favorite:
-              !current.favorite,
-          }
-        : current
-    );
+  const handleFavorite = async (paperId) => {
+    try {
+      const updated = await toggleFavorite(paperId);
+
+      // Keep the open preview in sync.
+      setSelectedPaper((current) =>
+        current?._id === updated?._id
+          ? updated
+          : current
+      );
+    } catch (err) {
+      console.error(
+        "[Library] Favorite error:",
+        err
+      );
+
+      toast.error(
+        "Could not update favorite",
+        err?.message || "Please try again."
+      );
+    }
   };
+
+  // ---------------------------------------------------
+  // Delete
+  // ---------------------------------------------------
+
+  const handleDelete = async (paper) => {
+    const confirmed = window.confirm(
+      `Remove "${paper.title}" from your library?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePaper(paper._id);
+
+      setSelectedPaper((current) =>
+        current?._id === paper._id
+          ? null
+          : current
+      );
+
+      toast.success(
+        "Paper removed",
+        `"${paper.title}" was removed from your library.`
+      );
+    } catch (err) {
+      console.error(
+        "[Library] Delete error:",
+        err
+      );
+
+      toast.error(
+        "Remove failed",
+        err?.message ||
+          "Unable to remove this paper."
+      );
+    }
+  };
+
+  const handleClearFilters = () => {
+    setQuery("");
+    setActiveTab("all");
+  };
+
+  const handleOpenDetail = (paper) => {
+    navigate(`/library/${paper._id}`);
+  };
+
+  // ---------------------------------------------------
+  // Tabs
+  // ---------------------------------------------------
+
+  const visiblePapers =
+    activeTab === "recent"
+      ? papers.slice(0, 4)
+      : papers;
+
+  /*
+   * Distinguishes "you have no papers" from
+   * "your filters matched nothing".
+   */
+  const isLibraryEmpty =
+    !query.trim() && activeTab !== "favorites";
 
   return (
     <div className="library-page">
       <LibraryHeader />
 
-      <LibraryStats
-        papers={papers}
-      />
+      <LibraryStats papers={papers} />
 
       <LibraryTabs
         activeTab={activeTab}
@@ -169,38 +161,48 @@ const LibraryPage = () => {
           <LibraryToolbar
             query={query}
             setQuery={setQuery}
-            year={year}
-            setYear={setYear}
-            type={type}
-            setType={setType}
             sort={sort}
             setSort={setSort}
             view={view}
             setView={setView}
-            resultCount={
-              filteredPapers.length
-            }
+            resultCount={visiblePapers.length}
           />
 
-          <LibraryPapers
-            papers={filteredPapers}
-            view={view}
-            onFavorite={
-              toggleFavorite
-            }
-            onOpen={setSelectedPaper}
-          />
+          {loading ? (
+            <div className="library-state">
+              <p>Loading your research library...</p>
+            </div>
+          ) : error ? (
+            <div className="library-state library-state--error">
+              <p>{error}</p>
+
+              <button
+                type="button"
+                onClick={fetchPapers}
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <LibraryPapers
+              papers={visiblePapers}
+              view={view}
+              onFavorite={handleFavorite}
+              onDelete={handleDelete}
+              onOpen={setSelectedPaper}
+              onOpenDetail={handleOpenDetail}
+              isLibraryEmpty={isLibraryEmpty}
+              onClearFilters={handleClearFilters}
+            />
+          )}
         </>
       )}
 
       <LibraryPaperModal
         paper={selectedPaper}
-        onClose={() =>
-          setSelectedPaper(null)
-        }
-        onFavorite={
-          toggleFavorite
-        }
+        onClose={() => setSelectedPaper(null)}
+        onFavorite={handleFavorite}
+        onDelete={handleDelete}
       />
     </div>
   );

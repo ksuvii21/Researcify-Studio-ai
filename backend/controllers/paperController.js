@@ -1,188 +1,215 @@
-//Axios is a popular, open-source JavaScript library used to
+﻿//Axios is a popular, open-source JavaScript library used to
 //make HTTP requests from web browsers or 
 // Node.js environments.
-const axios = require('axios');
-const Library = require('../models/Library');
+const axios = require("axios");
 
-// @desc Search academic papers from an external API (e.g., CrossRef, Semantic scholar, or arXiv) and normalize them
-// @route GET /api/v1/papers/search?q=
+const asyncHandler = require("../utils/asyncHandler");
+const ApiError = require("../utils/ApiError");
+const ApiResponse = require("../utils/ApiResponse");
 
-exports.searchPapers = async (req, res) => {
-    try{
-        //Extract the search quey 'q' from the request query parameters
-        const query = req.query.q;
-        //Validate the query parameter
-        if(!query || !query.trim()){
-            return res.status(400).json({success: false, message: 'Search query is required.'});
-        }
-        //Calling CrossRef API as an example
-        const externalApiResponse = await axios.get('https://api.crossref.org/works?query=${encodeURIComponent(query)}&rows=10');
-        // Map and normalize the external API data into your project's consistent structure
-        const normalizedPapers = externalApiResponse.data.message.items.map((item) => ({
-            title: item.title ? item.title[0] : 'No Title Available',
-            authors: item.author ? item.author.map(a => `${a.given || ''} ${a.family || ''}`.trim()) : [],
-            abstract: item.abstract || 'No abstract available.',
-            publicationYear: item.published?.['date-parts']?.[0]?.[0] || null,
-            doi: item.DOI || null,
-            source: 'CrossRef',
-            availableUrls: item.URL ? [item.URL] : []
-        }));
+const paperService = require("../services/paperService");
 
-        // Return the successfully normalized search results
-        res.status(200).json({
-            success: true,
-            message: 'Papers retrieved and normalized successfully',
-            data: {
-                papers: normalizedPapers
-            }
-        });
+/*
+ * The JWT payload is { id: userId } (see
+ * authController.generateToken), which is what
+ * req.user.id resolves to after verifyToken.
+ */
+const getUserId = (req) => req.user?.id || req.user?._id;
+
+// -----------------------------------------------------
+// Normalise a CrossRef work into our Paper shape
+// -----------------------------------------------------
+const normalizeCrossRefWork = (item) => ({
+  title: item.title ? item.title[0] : "No Title Available",
+
+  authors: item.author
+    ? item.author
+        .map((a) =>
+          `${a.given || ""} ${a.family || ""}`.trim()
+        )
+        .filter(Boolean)
+    : [],
+
+  abstract: item.abstract || "",
+
+  year: item.published?.["date-parts"]?.[0]?.[0] || null,
+
+  journal: item["container-title"]?.[0] || "",
+
+  doi: item.DOI || "",
+
+  url: item.URL || "",
+
+  source: "CrossRef",
+
+  externalId: item.DOI || item.URL || null,
+});
+
+// -----------------------------------------------------
+// Search Papers (external)
+// GET /api/v1/papers/search?q=
+// -----------------------------------------------------
+exports.searchPapers = asyncHandler(async (req, res) => {
+  const query = req.query.q;
+
+  if (!query || !query.trim()) {
+    throw new ApiError(400, "Search query is required.");
+  }
+
+  const response = await axios.get(
+    "https://api.crossref.org/works",
+    {
+      params: {
+        query: query.trim(),
+        rows: 10,
+      },
+      timeout: 15000,
     }
-    catch(err){
-        // Catch network or external API errors and return 500
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching papers from external sources',
-            error: error.message
-        });
+  );
+
+  const papers = (
+    response.data?.message?.items || []
+  ).map(normalizeCrossRefWork);
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { papers },
+      "Papers retrieved and normalized successfully."
+    )
+  );
+});
+
+// -----------------------------------------------------
+// Get All Saved Papers
+// GET /api/v1/papers
+// -----------------------------------------------------
+exports.getPapers = asyncHandler(async (req, res) => {
+  const papers = await paperService.getPapers(
+    getUserId(req),
+    {
+      search: req.query.search,
+      sort: req.query.sort,
+      order: req.query.order,
+      favorite: req.query.favorite,
     }
-};
+  );
 
-// @desc    Retrieve detailed information for a single paper by its ID or DOI
-// @route   GET /api/v1/papers/:id
-exports.getPaperById = async (req, res) => {
-    try {
-        const paperId = req.params.id;
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      papers,
+      "Papers fetched successfully."
+    )
+  );
+});
 
-        // Fetch specific paper details from the external provider using the ID/DOI
-        const externalApiResponse = await axios.get(`https://api.crossref.org/works/${paperId}`);
-        const item = externalApiResponse.data.message;
+// -----------------------------------------------------
+// Get Single Saved Paper
+// GET /api/v1/papers/:id
+// -----------------------------------------------------
+exports.getPaperById = asyncHandler(async (req, res) => {
+  const paper = await paperService.getPaperById(
+    getUserId(req),
+    req.params.id
+  );
 
-        // Normalize the single paper data structure
-        const paper = {
-            title: item.title ? item.title[0] : 'No Title Available',
-            authors: item.author ? item.author.map(a => `${a.given || ''} ${a.family || ''}`.trim()) : [],
-            abstract: item.abstract || 'No abstract available.',
-            publicationYear: item.published?.['date-parts']?.[0]?.[0] || null,
-            doi: item.DOI || null,
-            source: 'CrossRef',
-            availableUrls: item.URL ? [item.URL] : []
-        };
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      paper,
+      "Paper fetched successfully."
+    )
+  );
+});
 
-        res.status(200).json({
-            success: true,
-            message: 'Paper details retrieved successfully',
-            data: {
-                paper
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            success: false,
-            message: 'Paper not found',
-            error: error.message
-        });
-    }
-};
+// -----------------------------------------------------
+// Create Paper
+// POST /api/v1/papers
+// -----------------------------------------------------
+exports.createPaper = asyncHandler(async (req, res) => {
+  const { title } = req.body;
 
-// @desc    Save a paper to the authenticated user's personal library
-// @route   POST /api/v1/library
-exports.savePaper = async (req, res) => {
-    try {
-        // Extract paper metadata from the request body
-        const { title, authors, abstract, publicationYear, doi, source, availableUrls } = req.body;
+  if (!title || !title.trim()) {
+    throw new ApiError(400, "Paper title is required.");
+  }
 
-        // Check if the paper is already saved by this user to avoid duplicates
-        const existingEntry = await Library.findOne({ user: req.user.id, doi });
-        if (existingEntry) {
-            return res.status(400).json({
-                success: false,
-                message: 'Paper is already saved in your library.'
-            });
-        }
+  const paper = await paperService.createPaper(
+    getUserId(req),
+    req.body
+  );
 
-        // Create a new saved library record linked to the logged-in user
-        const newSavedPaper = new Library({
-            user: req.user.id, // Attached by verifyToken middleware
-            title,
-            authors,
-            abstract,
-            publicationYear,
-            doi,
-            source,
-            availableUrls
-        });
+  res.status(201).json(
+    new ApiResponse(
+      201,
+      paper,
+      "Paper saved successfully."
+    )
+  );
+});
 
-        // Save to database
-        await newSavedPaper.save();
+// -----------------------------------------------------
+// Update Paper
+// PATCH /api/v1/papers/:id
+// -----------------------------------------------------
+exports.updatePaper = asyncHandler(async (req, res) => {
+  const paper = await paperService.updatePaper(
+    getUserId(req),
+    req.params.id,
+    req.body
+  );
 
-        res.status(201).json({
-            success: true,
-            message: 'Paper saved to library successfully',
-            data: {
-                savedPaper: newSavedPaper
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Failed to save paper',
-            error: error.message
-        });
-    }
-};
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      paper,
+      "Paper updated successfully."
+    )
+  );
+});
 
-// @desc    Retrieve all saved papers for the authenticated user
-// @route   GET /api/v1/library
-exports.getSavedPapers = async (req, res) => {
-    try {
-        // Query the database for all library records belonging to the current user
-        const savedPapers = await Library.find({ user: req.user.id });
+// -----------------------------------------------------
+// Delete Paper
+// DELETE /api/v1/papers/:id
+// -----------------------------------------------------
+exports.deletePaper = asyncHandler(async (req, res) => {
+  await paperService.deletePaper(
+    getUserId(req),
+    req.params.id
+  );
 
-        res.status(200).json({
-            success: true,
-            message: 'Saved papers retrieved successfully',
-            data: {
-                papers: savedPapers
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Failed to retrieve saved papers',
-            error: error.message
-        });
-    }
-};
+  res.status(200).json(
+    new ApiResponse(200, null, "Paper deleted successfully.")
+  );
+});
 
-// @desc    Remove a saved paper from the user's library by its database record ID
-// @route   DELETE /api/v1/library/:paperId
-exports.removeSavedPaper = async (req, res) => {
-    try {
-        const { paperId } = req.params;
+// -----------------------------------------------------
+// Toggle Favorite
+// PATCH /api/v1/papers/:id/favorite
+// -----------------------------------------------------
+exports.toggleFavorite = asyncHandler(
+  async (req, res) => {
+    const paper = await paperService.getPaperById(
+      getUserId(req),
+      req.params.id
+    );
 
-        // Find and delete the library record ensuring it belongs to the authenticated user
-        const deletedPaper = await Library.findOneAndDelete({
-            _id: paperId,
-            user: req.user.id
-        });
+    const updated = await paperService.updatePaper(
+      getUserId(req),
+      req.params.id,
+      {
+        isFavorite: !paper.isFavorite,
+      }
+    );
 
-        if (!deletedPaper) {
-            return res.status(404).json({
-                success: false,
-                message: 'Saved paper not found or unauthorized'
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: 'Paper removed from library successfully',
-            data: null
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Failed to remove saved paper',
-            error: error.message
-        });
-    }
-};
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        updated,
+        updated.isFavorite
+          ? "Paper added to favorites."
+          : "Paper removed from favorites."
+      )
+    );
+  }
+);

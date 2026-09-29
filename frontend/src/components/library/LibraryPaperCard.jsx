@@ -1,18 +1,36 @@
 import {
-  Bot,
-  ExternalLink,
-  FolderPlus,
   Heart,
-  MoreHorizontal,
-  Quote,
+  Star,
+  Trash2,
 } from "lucide-react";
 
 const LibraryPaperCard = ({
   paper,
   view,
   onFavorite,
+  onDelete,
   onOpen,
+  onOpenDetail,
 }) => {
+  const authors = paper.authors?.length
+    ? paper.authors.join(", ")
+    : "Unknown authors";
+
+  const journalLine = [paper.journal, paper.year]
+    .filter(Boolean)
+    .join(" · ");
+
+  const addedDate = paper.createdAt
+    ? new Date(paper.createdAt).toLocaleDateString(
+        undefined,
+        {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }
+      )
+    : "—";
+
   return (
     <article
       className={`library-paper ${
@@ -23,11 +41,11 @@ const LibraryPaperCard = ({
     >
       <div className="library-paper__top">
         <div className="library-paper__badges">
-          <span>{paper.type}</span>
+          <span>{paper.source}</span>
 
-          {paper.openAccess && (
+          {paper.isFavorite && (
             <span className="open-access">
-              Open Access
+              Favorite
             </span>
           )}
         </div>
@@ -35,106 +53,98 @@ const LibraryPaperCard = ({
         <button
           type="button"
           className="library-paper__more"
-          aria-label="More actions"
+          aria-label="Remove from library"
+          onClick={onDelete}
         >
-          <MoreHorizontal size={18} />
+          <Trash2 size={16} />
         </button>
       </div>
 
       <div className="library-paper__content">
-        <h2>{paper.title}</h2>
+        <h2
+          className="library-paper__title"
+          onClick={() => onOpenDetail(paper)}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (
+              event.key === "Enter" ||
+              event.key === " "
+            ) {
+              event.preventDefault();
+              onOpenDetail(paper);
+            }
+          }}
+        >
+          {paper.title}
+        </h2>
 
         <p className="library-paper__authors">
-          {paper.authors.join(", ")}
+          {authors}
         </p>
 
-        <p className="library-paper__journal">
-          {paper.journal} · {paper.year}
-        </p>
+        {journalLine && (
+          <p className="library-paper__journal">
+            {journalLine}
+          </p>
+        )}
 
-        <p className="library-paper__abstract">
-          {paper.abstract}
-        </p>
+        {paper.abstract && (
+          <p className="library-paper__abstract">
+            {paper.abstract}
+          </p>
+        )}
 
-        <div className="library-paper__tags">
-          {paper.tags.map((tag) => (
-            <span key={tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
+        {paper.keywords?.length > 0 && (
+          <div className="library-paper__tags">
+            {paper.keywords.map((keyword) => (
+              <span key={keyword}>
+                {keyword}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="library-paper__metadata">
-        <span>
-          <Quote size={13} />
-          {paper.citations} citations
-        </span>
+        {paper.doi ? (
+          <span>DOI {paper.doi}</span>
+        ) : (
+          <span>No DOI</span>
+        )}
 
-        <span>
-          Added {paper.added}
-        </span>
-      </div>
-
-      <div className="library-paper__relation">
-        <div>
-          <span>Project</span>
-          <strong>{paper.project}</strong>
-        </div>
-
-        <div>
-          <span>Collection</span>
-          <strong>
-            {paper.collection}
-          </strong>
-        </div>
+        <span>Added {addedDate}</span>
       </div>
 
       <footer className="library-paper__actions">
         <button
           type="button"
-          onClick={() =>
-            onFavorite(paper.id)
-          }
+          onClick={() => onFavorite(paper._id)}
           className={
-            paper.favorite
-              ? "favorite"
-              : ""
+            paper.isFavorite ? "favorite" : ""
           }
         >
-          <Heart
+          <Star
             size={15}
             fill={
-              paper.favorite
+              paper.isFavorite
                 ? "currentColor"
                 : "none"
             }
           />
 
-          {paper.favorite
+          {paper.isFavorite
             ? "Favorited"
             : "Favorite"}
-        </button>
-
-        <button type="button">
-          <FolderPlus size={15} />
-          Organize
-        </button>
-
-        <button type="button">
-          <Bot size={15} />
-          AI Summary
         </button>
 
         <button
           type="button"
           className="library-paper__open"
-          onClick={() =>
-            onOpen(paper)
-          }
+          onClick={() => onOpen(paper)}
         >
-          <ExternalLink size={15} />
-          Preview
+          <Heart size={15} />
+          Quick Preview
         </button>
       </footer>
     </article>

@@ -1,13 +1,19 @@
 import {
   BookOpen,
   FolderOpen,
-  Heart,
-  Upload,
+  Library,
+  Star,
 } from "lucide-react";
 
 const LibraryStats = ({
   papers,
 }) => {
+  /*
+   * Only values derivable from the real Paper model.
+   *
+   * Collections are not integrated yet (Phase 8E), so
+   * that card shows an em dash rather than a number.
+   */
   const stats = [
     {
       label: "Total Papers",
@@ -17,21 +23,20 @@ const LibraryStats = ({
     {
       label: "Favorites",
       value: papers.filter(
-        (paper) => paper.favorite
+        (paper) => paper.isFavorite
       ).length,
-      icon: Heart,
+      icon: Star,
     },
     {
-      label: "Uploaded",
+      label: "Journal Articles",
       value: papers.filter(
-        (paper) =>
-          paper.source === "Uploaded"
+        (paper) => Boolean(paper.journal)
       ).length,
-      icon: Upload,
+      icon: Library,
     },
     {
       label: "Collections",
-      value: 4,
+      value: "—",
       icon: FolderOpen,
     },
   ];

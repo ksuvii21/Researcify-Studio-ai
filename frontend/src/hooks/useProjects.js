@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -30,7 +31,16 @@ const useProjects = ({
   const [mutationLoading, setMutationLoading] =
     useState(false);
 
+  /*
+   * Guards against a slow, stale fetch overwriting
+   * the results of a newer one when filters change
+   * quickly.
+   */
+  const requestSequence = useRef(0);
+
   const fetchProjects = useCallback(async () => {
+    const requestId = ++requestSequence.current;
+
     try {
       setLoading(true);
       setError("");
@@ -42,8 +52,16 @@ const useProjects = ({
         order: "desc",
       });
 
+      if (requestId !== requestSequence.current) {
+        return;
+      }
+
       setProjects(response?.data || []);
     } catch (err) {
+      if (requestId !== requestSequence.current) {
+        return;
+      }
+
       console.error(
         "[Projects] Fetch error:",
         err
@@ -51,10 +69,12 @@ const useProjects = ({
 
       setError(
         err?.message ||
-        "Unable to load your research projects."
+          "Unable to load your research projects."
       );
     } finally {
-      setLoading(false);
+      if (requestId === requestSequence.current) {
+        setLoading(false);
+      }
     }
   }, [search, status]);
 

@@ -1,5 +1,4 @@
 import {
-  BookOpen,
   Plus,
   Sparkles,
   Upload,

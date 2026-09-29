@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import useDashboardProjects from "../../../hooks/useDashboardProjects";
+import useDashboardPapers from "../../../hooks/useDashboardPapers";
 
 const MiniTrend = ({ points }) => {
   const coordinates = points
@@ -41,26 +42,32 @@ const ResearchOverview = () => {
     loading,
   } = useDashboardProjects();
 
+  const {
+    totalPapers,
+    favoritePapers,
+    loading: papersLoading,
+  } = useDashboardPapers();
+
   /*
-   * Only project values are real in Phase 8A.
+   * Projects and Papers are real (Phases 8A / 8B).
    *
-   * Papers   -> Phase 8B
-   * Notes    -> Phase 8C
-   * Activity -> Phase 8F
-   * AI       -> Phase 8G
+   * Notes, Documents, Collections and AI are not
+   * integrated yet, so they show an em dash rather
+   * than a Phase 7 sample number that could be
+   * mistaken for real data.
    *
-   * The remaining cards keep their Phase 7
-   * placeholder values and are marked so they are
-   * not mistaken for real data.
+   * Notes     -> Phase 8C
+   * Documents -> Phase 8D
+   * Activity  -> Phase 8F
+   * AI        -> Phase 8G
    */
   const stats = [
     {
       label: "Total Papers",
-      value: 128,
-      change: "+12 this month",
+      value: papersLoading ? "—" : totalPapers,
+      change: "Saved in your library",
       icon: BookMarked,
       trend: [35, 48, 42, 62, 57, 76, 82],
-      placeholder: true,
     },
     {
       label: "Active Projects",
@@ -70,28 +77,25 @@ const ResearchOverview = () => {
       trend: [32, 35, 43, 41, 52, 57, 61],
     },
     {
-      label: "Saved Papers",
-      value: 84,
-      change: "+8 this week",
+      label: "Favorite Papers",
+      value: papersLoading ? "—" : favoritePapers,
+      change: "Starred in your library",
       icon: TrendingUp,
       trend: [28, 40, 37, 51, 65, 61, 77],
-      placeholder: true,
     },
     {
       label: "Research Notes",
-      value: 47,
-      change: "+5 this week",
+      value: "—",
+      change: "Not connected yet",
       icon: NotebookPen,
       trend: [25, 31, 47, 43, 58, 65, 72],
-      placeholder: true,
     },
     {
       label: "AI Conversations",
-      value: 23,
-      change: "+7 this month",
+      value: "—",
+      change: "Not connected yet",
       icon: MessageSquareText,
       trend: [22, 36, 31, 48, 44, 64, 70],
-      placeholder: true,
     },
   ];
 
@@ -116,7 +120,6 @@ const ResearchOverview = () => {
             change,
             icon: Icon,
             trend,
-            placeholder,
           }) => (
             <article
               className="overview-card"
@@ -138,11 +141,7 @@ const ResearchOverview = () => {
                 {label}
               </span>
 
-              <small>
-                {placeholder
-                  ? "Sample data — not yet connected"
-                  : change}
-              </small>
+              <small>{change}</small>
             </article>
           )
         )}

@@ -1,4 +1,5 @@
 const ResearchProject = require("../models/ResearchProject");
+const Paper = require("../models/Paper");
 const ApiError = require("../utils/ApiError");
 
 // -----------------------------------------------------
@@ -188,10 +189,133 @@ const deleteProject = async (userId, projectId) => {
   return project;
 };
 
+// -----------------------------------------------------
+// Attach Paper to Project
+// -----------------------------------------------------
+const addPaperToProject = async (
+  userId,
+  projectId,
+  paperId
+) => {
+  /*
+   * Both resources are scoped to userId. A paper or
+   * project owned by someone else simply does not
+   * resolve, so it can never be attached: ownership
+   * is enforced by the query, not by a later check.
+   */
+  const [project, paper] = await Promise.all([
+    ResearchProject.findOne({
+      _id: projectId,
+      userId,
+    }),
+
+    Paper.findOne({
+      _id: paperId,
+      userId,
+    }),
+  ]);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  if (!paper) {
+    throw new ApiError(404, "Paper not found.");
+  }
+
+  const alreadyAttached = project.paperIds.some(
+    (id) => id.toString() === paper._id.toString()
+  );
+
+  if (alreadyAttached) {
+    throw new ApiError(
+      409,
+      "Paper is already attached to this project."
+    );
+  }
+
+  project.paperIds.push(paper._id);
+
+  await project.save();
+
+  return project;
+};
+
+// -----------------------------------------------------
+// Detach Paper from Project
+// -----------------------------------------------------
+const removePaperFromProject = async (
+  userId,
+  projectId,
+  paperId
+) => {
+  const project = await ResearchProject.findOne({
+    _id: projectId,
+    userId,
+  });
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const attached = project.paperIds.some(
+    (id) => id.toString() === paperId.toString()
+  );
+
+  if (!attached) {
+    throw new ApiError(
+      404,
+      "Paper is not attached to this project."
+    );
+  }
+
+  project.paperIds.pull(paperId);
+
+  await project.save();
+
+  return project;
+};
+
+// -----------------------------------------------------
+// Get Papers Attached to a Project
+// -----------------------------------------------------
+const getProjectPapers = async (
+  userId,
+  projectId
+) => {
+  const project = await ResearchProject.findOne({
+    _id: projectId,
+    userId,
+  })
+    .populate({
+      path: "paperIds",
+      match: {
+        userId,
+      },
+    })
+    .lean();
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  /*
+   * `populate` yields null for any id that no longer
+   * matches (e.g. a paper removed directly from the
+   * database). Filter those out so callers never get
+   * null entries.
+   */
+  return (project.paperIds || []).filter(Boolean);
+};
+
 module.exports = {
   createProject,
   getProjects,
   getProjectById,
   updateProject,
   deleteProject,
+
+  addPaperToProject,
+  removePaperFromProject,
+  getProjectPapers,
 };

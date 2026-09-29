@@ -290,6 +290,149 @@
 
 /* DETAIL STATES */
 
+.project-relation-state {
+  padding: 45px 20px;
+
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+
+  color: var(--text-muted);
+
+  text-align: center;
+}
+
+.project-relation-state h3 {
+  color: var(--text-soft);
+
+  font-size: 15px;
+}
+
+.project-relation-state p {
+  margin-top: 6px;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.project-relation-state--error p {
+  color: var(--danger);
+}
+
+.project-relation-state button {
+  min-height: 35px;
+
+  margin-top: 14px;
+  padding: 0 12px;
+
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #0d1321;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-theme="light"]
+.project-relation-state button {
+  color: #eae0d5;
+}
+
+.project-resource__remove {
+  color: var(--text-muted);
+}
+
+.project-resource__remove:hover {
+  border-color: var(--danger);
+
+  color: var(--danger);
+}
+
+/* RELATION MODAL OPTIONS */
+
+.relation-options {
+  max-height: 300px;
+
+  display: grid;
+
+  gap: 7px;
+
+  overflow-y: auto;
+}
+
+.relation-options__state {
+  padding: 28px 14px;
+
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  line-height: 1.6;
+
+  text-align: center;
+}
+
+.relation-option {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+
+  padding: 11px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 9px;
+
+  background: var(--surface-alt);
+
+  cursor: pointer;
+}
+
+.relation-option:hover {
+  border-color: var(--border-strong);
+}
+
+.relation-option--selected {
+  border-color: var(--accent);
+
+  background: var(--accent-soft);
+}
+
+.relation-option input {
+  margin-top: 3px;
+
+  accent-color: var(--accent);
+}
+
+.relation-option div {
+  min-width: 0;
+}
+
+.relation-option strong {
+  display: block;
+
+  color: var(--text-soft);
+
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.relation-option small {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .project-detail-state {
   margin-top: 20px;
   padding: 70px 20px;

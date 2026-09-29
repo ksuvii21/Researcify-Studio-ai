@@ -65,12 +65,50 @@ export const deleteProject = async (projectId) => {
   return response.data;
 };
 
+// -----------------------------------------------------
+// Project papers (relationship)
+// -----------------------------------------------------
+
+export const getProjectPapers = async (projectId) => {
+  const response = await apiClient.get(
+    `/projects/${projectId}/papers`
+  );
+
+  return response.data;
+};
+
+export const addPaperToProject = async (
+  projectId,
+  paperId
+) => {
+  const response = await apiClient.post(
+    `/projects/${projectId}/papers`,
+    { paperId }
+  );
+
+  return response.data;
+};
+
+export const removePaperFromProject = async (
+  projectId,
+  paperId
+) => {
+  const response = await apiClient.delete(
+    `/projects/${projectId}/papers/${paperId}`
+  );
+
+  return response.data;
+};
+
 const projectApi = {
   getProjects,
   getProjectById,
   createProject,
   updateProject,
   deleteProject,
+  getProjectPapers,
+  addPaperToProject,
+  removePaperFromProject,
 };
 
 export default projectApi;

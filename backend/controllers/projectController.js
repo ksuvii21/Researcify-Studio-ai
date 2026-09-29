@@ -118,6 +118,79 @@ exports.updateProject = asyncHandler(async (req, res) => {
 });
 
 // -----------------------------------------------------
+// Get Project Papers
+// GET /api/v1/projects/:id/papers
+// -----------------------------------------------------
+exports.getProjectPapers = asyncHandler(
+  async (req, res) => {
+    const papers =
+      await projectService.getProjectPapers(
+        getUserId(req),
+        req.params.id
+      );
+
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        papers,
+        "Project papers fetched successfully."
+      )
+    );
+  }
+);
+
+// -----------------------------------------------------
+// Attach Paper to Project
+// POST /api/v1/projects/:id/papers
+// -----------------------------------------------------
+exports.addPaperToProject = asyncHandler(
+  async (req, res) => {
+    const { paperId } = req.body;
+
+    if (!paperId) {
+      throw new ApiError(400, "Paper ID is required.");
+    }
+
+    const project =
+      await projectService.addPaperToProject(
+        getUserId(req),
+        req.params.id,
+        paperId
+      );
+
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        project,
+        "Paper added to project successfully."
+      )
+    );
+  }
+);
+
+// -----------------------------------------------------
+// Detach Paper from Project
+// DELETE /api/v1/projects/:id/papers/:paperId
+// -----------------------------------------------------
+exports.removePaperFromProject = asyncHandler(
+  async (req, res) => {
+    await projectService.removePaperFromProject(
+      getUserId(req),
+      req.params.id,
+      req.params.paperId
+    );
+
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        null,
+        "Paper removed from project successfully."
+      )
+    );
+  }
+);
+
+// -----------------------------------------------------
 // Delete Project
 // DELETE /api/projects/:id
 // -----------------------------------------------------

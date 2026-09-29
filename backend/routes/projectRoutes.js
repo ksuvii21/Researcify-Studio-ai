@@ -6,6 +6,9 @@ const {
   getProjectById,
   updateProject,
   deleteProject,
+  getProjectPapers,
+  addPaperToProject,
+  removePaperFromProject,
 } = require("../controllers/projectController");
 
 const verifyToken = require("../middleware/auth");
@@ -19,6 +22,22 @@ router
   .route("/")
   .get(getProjects)
   .post(createProject);
+
+/*
+ * Relationship routes are declared before the generic
+ * "/:id" handlers. They use distinct paths, so there
+ * is no ambiguity, but keeping them grouped makes the
+ * paper relationship explicit.
+ */
+router
+  .route("/:id/papers")
+  .get(getProjectPapers)
+  .post(addPaperToProject);
+
+router.delete(
+  "/:id/papers/:paperId",
+  removePaperFromProject
+);
 
 router
   .route("/:id")

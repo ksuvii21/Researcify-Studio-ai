@@ -5,13 +5,22 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
+/*
+ * Year and type filters from Phase 7 are not wired
+ * yet.
+ *
+ * year  -> the model stores a per-paper `year`, but
+ *          the option list was hard-coded to
+ *          2024-2026, so it would silently hide real
+ *          papers. It becomes a real filter in 8B.5.
+ * type  -> the Paper model has no `type` field.
+ *
+ * Both are therefore rendered disabled so they are
+ * visibly not yet active rather than silently broken.
+ */
 const LibraryToolbar = ({
   query,
   setQuery,
-  year,
-  setYear,
-  type,
-  setType,
   sort,
   setSort,
   view,
@@ -29,7 +38,7 @@ const LibraryToolbar = ({
           onChange={(event) =>
             setQuery(event.target.value)
           }
-          placeholder="Search your library..."
+          placeholder="Search title, author, journal or keyword..."
         />
       </div>
 
@@ -43,49 +52,15 @@ const LibraryToolbar = ({
           Filters
         </span>
 
-        <select
-          value={year}
-          onChange={(event) =>
-            setYear(event.target.value)
-          }
-        >
+        <select value="all" disabled title="Available in Phase 8B.5">
           <option value="all">
             Any Year
           </option>
-
-          <option value="2026">
-            2026
-          </option>
-
-          <option value="2025">
-            2025
-          </option>
-
-          <option value="2024">
-            2024
-          </option>
         </select>
 
-        <select
-          value={type}
-          onChange={(event) =>
-            setType(event.target.value)
-          }
-        >
+        <select value="all" disabled title="Available in Phase 8B.5">
           <option value="all">
             All Types
-          </option>
-
-          <option value="Journal Article">
-            Journal Article
-          </option>
-
-          <option value="Research Paper">
-            Research Paper
-          </option>
-
-          <option value="Review">
-            Review
           </option>
         </select>
 
@@ -95,16 +70,12 @@ const LibraryToolbar = ({
             setSort(event.target.value)
           }
         >
-          <option value="recent">
+          <option value="createdAt">
             Recently Added
           </option>
 
-          <option value="newest">
+          <option value="year">
             Publication Year
-          </option>
-
-          <option value="citations">
-            Most Cited
           </option>
 
           <option value="title">
@@ -116,13 +87,9 @@ const LibraryToolbar = ({
           <button
             type="button"
             className={
-              view === "grid"
-                ? "active"
-                : ""
+              view === "grid" ? "active" : ""
             }
-            onClick={() =>
-              setView("grid")
-            }
+            onClick={() => setView("grid")}
             aria-label="Grid view"
           >
             <Grid2X2 size={16} />
@@ -131,13 +98,9 @@ const LibraryToolbar = ({
           <button
             type="button"
             className={
-              view === "list"
-                ? "active"
-                : ""
+              view === "list" ? "active" : ""
             }
-            onClick={() =>
-              setView("list")
-            }
+            onClick={() => setView("list")}
             aria-label="List view"
           >
             <List size={17} />

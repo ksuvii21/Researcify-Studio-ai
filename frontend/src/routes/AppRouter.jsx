@@ -15,6 +15,7 @@ import DiscoverPage from "../pages/DiscoverPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ProjectDetailPage from "../pages/ProjectDetailPage";
 import LibraryPage from "../pages/LibraryPage";
+import PaperDetailPage from "../pages/PaperDetailPage";
 import NotesPage from "../pages/NotesPage";
 import NoteEditorPage from "../pages/NoteEditorPage";
 import AIAssistantPage from "../pages/AIAssistantPage";
@@ -83,7 +84,7 @@ const AppRouter = () => {
             path="/discover"
             element={<DiscoverPage />}
           />
-           
+
           <Route
             path="/projects"
             element={<ProjectsPage />}
@@ -95,6 +96,10 @@ const AppRouter = () => {
           <Route
             path="/library"
             element={<LibraryPage />}
+          />
+          <Route
+            path="/library/:id"
+            element={<PaperDetailPage />}
           />
 
           <Route

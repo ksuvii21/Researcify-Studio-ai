@@ -1,10 +1,8 @@
 import {
-  Bot,
   BookOpen,
-  FolderPlus,
-  Heart,
-  Quote,
-  Sparkles,
+  ExternalLink,
+  Star,
+  Trash2,
 } from "lucide-react";
 
 import Modal from "../common/Modal";
@@ -13,8 +11,24 @@ const LibraryPaperModal = ({
   paper,
   onClose,
   onFavorite,
+  onDelete,
 }) => {
   if (!paper) return null;
+
+  const authors = paper.authors?.length
+    ? paper.authors.join(", ")
+    : "Unknown authors";
+
+  const addedDate = paper.createdAt
+    ? new Date(paper.createdAt).toLocaleDateString(
+        undefined,
+        {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }
+      )
+    : "—";
 
   return (
     <Modal
@@ -27,34 +41,33 @@ const LibraryPaperModal = ({
     >
       <div className="library-preview">
         <div className="library-preview__badges">
-          <span>{paper.type}</span>
+          <span>{paper.source}</span>
 
-          <span>{paper.year}</span>
+          {paper.year && <span>{paper.year}</span>}
 
-          {paper.openAccess && (
-            <span>Open Access</span>
+          {paper.isFavorite && (
+            <span>Favorite</span>
           )}
         </div>
 
         <h2>{paper.title}</h2>
 
         <p className="library-preview__authors">
-          {paper.authors.join(", ")}
+          {authors}
         </p>
 
-        <p className="library-preview__journal">
-          {paper.journal}
-        </p>
+        {paper.journal && (
+          <p className="library-preview__journal">
+            {paper.journal}
+          </p>
+        )}
 
         <div className="library-preview__stats">
-          <span>
-            <Quote size={14} />
-            {paper.citations} citations
-          </span>
+          {paper.doi && (
+            <span>DOI {paper.doi}</span>
+          )}
 
-          <span>
-            Added {paper.added}
-          </span>
+          <span>Added {addedDate}</span>
         </div>
 
         <section>
@@ -62,73 +75,66 @@ const LibraryPaperModal = ({
             Abstract
           </span>
 
-          <p>{paper.abstract}</p>
+          <p>
+            {paper.abstract ||
+              "No abstract available for this paper."}
+          </p>
         </section>
 
-        <section>
-          <span className="library-preview__label">
-            Research Topics
-          </span>
+        {paper.keywords?.length > 0 && (
+          <section>
+            <span className="library-preview__label">
+              Research Topics
+            </span>
 
-          <div className="library-preview__tags">
-            {paper.tags.map((tag) => (
-              <span key={tag}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        </section>
-
-        <div className="library-preview__context">
-          <Sparkles size={18} />
-
-          <div>
-            <strong>
-              Research Context
-            </strong>
-
-            <p>
-              This paper is currently connected
-              to the{" "}
-              <b>{paper.project}</b> project and
-              the <b>{paper.collection}</b>{" "}
-              collection.
-            </p>
-          </div>
-        </div>
+            <div className="library-preview__tags">
+              {paper.keywords.map((keyword) => (
+                <span key={keyword}>
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="library-preview__actions">
           <button
             type="button"
-            onClick={() =>
-              onFavorite(paper.id)
-            }
+            onClick={() => onFavorite(paper._id)}
           >
-            <Heart
+            <Star
               size={15}
               fill={
-                paper.favorite
+                paper.isFavorite
                   ? "currentColor"
                   : "none"
               }
             />
 
-            {paper.favorite
+            {paper.isFavorite
               ? "Favorited"
               : "Favorite"}
           </button>
 
-          <button type="button">
-            <FolderPlus size={15} />
-            Add to Project
-          </button>
+          {paper.url && (
+            <a
+              className="library-preview__link"
+              href={paper.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ExternalLink size={15} />
+              View source
+            </a>
+          )}
 
           <button
             type="button"
-            className="library-preview__ai"
+            className="library-preview__delete"
+            onClick={() => onDelete(paper)}
           >
-            <Bot size={15} />
-            Ask AI
+            <Trash2 size={15} />
+            Remove
           </button>
         </div>
       </div>
