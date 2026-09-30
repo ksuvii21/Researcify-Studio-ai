@@ -1,0 +1,110 @@
+.research-activity__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Empty state from activity.css */
+
+.activity-empty {
+  padding: 24px 16px;
+
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.activity-empty__icon {
+  margin-bottom: 12px;
+
+  opacity: 0.4;
+}
+
+.activity-empty__title {
+  margin: 0 0 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.activity-empty__description {
+  margin: 0;
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Skeleton */
+
+.activity-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.activity-skeleton__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  height: 56px;
+}
+
+.activity-skeleton__icon {
+  flex-shrink: 0;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: var(--radius-sm);
+
+  background: linear-gradient(
+    90deg,
+    var(--surface-hover) 25%,
+    var(--surface-alt) 50%,
+    var(--surface-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.activity-skeleton__content {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-skeleton__line {
+  height: 12px;
+
+  border-radius: var(--radius-xs);
+
+  background: linear-gradient(
+    90deg,
+    var(--surface-hover) 25%,
+    var(--surface-alt) 50%,
+    var(--surface-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.activity-skeleton__line--short {
+  width: 60%;
+}
+
+.activity-skeleton__line--time {
+  width: 35%;
+  height: 10px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
